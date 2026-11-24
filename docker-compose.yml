@@ -1,0 +1,71 @@
+services:
+  app:
+    build: .
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      APP_DATA_DIR: /app/.data
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      ADMIN_SETUP_TOKEN: ${ADMIN_SETUP_TOKEN:-}
+      TIKTOK_BRIDGE_URL: http://tiktok-bridge:8000
+      TRUST_PROXY: "1"
+    volumes:
+      - dafzz-data:/app/.data
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      tiktok-bridge:
+        condition: service_started
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  tiktok-bridge:
+    build: ./vendor/tiktok-dm-api
+    init: true
+    restart: unless-stopped
+    environment:
+      TTDM_DATA: /data
+      TTDM_WEBHOOK_URL: http://app:3000/webhooks/tiktok
+    volumes:
+      - tiktok-data:/data
+    expose:
+      - "8000"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    mem_limit: 300000000
+    memswap_limit: 300000000
+    pids_limit: 32
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: [https]
+    restart: unless-stopped
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+volumes:
+  dafzz-data:
+  tiktok-data:
+  caddy-data:
+  caddy-config:

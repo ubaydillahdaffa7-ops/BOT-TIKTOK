@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><base href="/">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070d18">
+<meta name="description" content="DAFZZ-TOOLS — 300 utilitas digital dalam enam kategori: foto, teks, file, konverter, keamanan, dan web.">
+<title>DAFZZ-TOOLS — Digital Workspace</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ambient-grid" aria-hidden="true"></div>
+<div class="ambient-rail rail-one" aria-hidden="true"></div>
+<div class="ambient-rail rail-two" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="#" id="homeLink" aria-label="DAFZZ-TOOLS beranda">
+    <span class="brand-mark">D</span><span class="brand-name">DAFZZ<span class="brand-blue">-TOOLS</span></span>
+  </a>
+  <nav aria-label="Navigasi utama">
+    <button data-gohome="homeView"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Beranda</button>
+    <button data-gohome="categories"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Kategori</button>
+    <button data-gohome="popular"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>Populer</button>
+    <a class="config-nav-link" href="/admin">Konfigurasi</a>
+  </nav>
+  <button id="themeBtn" class="icon-btn" aria-label="Ganti tema" title="Ganti tema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/></svg></button>
+</header>
+<main class="container">
+<section id="homeView" class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow"><span class="live-dot"></span> DIGITAL WORKSPACE <span class="eyebrow-rule"></span> EST. 2026</p>
+    <h1>Alat digital,<br><span>siap digunakan.</span></h1>
+    <p class="intro">Ruang kerja digital untuk mengolah gambar, dokumen, teks, data, dan website. Langsung dari browser, tanpa instalasi tambahan.</p>
+    <div class="zero-upload-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg><span>Diproses di Browser — Hasil Bot Disimpan Sementara</span></div>
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+      <input id="globalSearch" class="field search" placeholder="Cari alat, misalnya QR, PDF, kompres gambar..." autocomplete="off" aria-label="Cari tools">
+      <span class="search-shortcut">SEARCH</span>
+      <div id="searchResults" class="search-results hidden"></div>
+    </div>
+    <div class="hero-meta"><span class="meta-mark"></span> 300 tools dalam satu katalog <span class="meta-divider"></span> Berbasis browser <span class="meta-divider"></span> Tanpa akun</div>
+  </div>
+  <div class="orb-stage" aria-label="Ilustrasi bola wireframe digital">
+    <div class="orb-grid"></div>
+    <div class="orb-halo"></div>
+    <div class="orbit orbit-a"><i></i></div><div class="orbit orbit-b"><i></i></div>
+    <span class="orbit-node node-a"></span><span class="orbit-node node-b"></span><span class="orbit-node node-c"></span>
+    <svg class="wire-orb" viewBox="0 0 360 360" role="img" aria-label="Bola digital dari garis biru">
+      <defs>
+        <radialGradient id="orbFill"><stop offset="0" stop-color="#168bff" stop-opacity=".17"/><stop offset=".75" stop-color="#0877ff" stop-opacity=".035"/><stop offset="1" stop-color="#0877ff" stop-opacity="0"/></radialGradient>
+        <filter id="orbGlow"><feGaussianBlur stdDeviation="2.6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="180" cy="180" r="146" fill="url(#orbFill)"/>
+      <g class="orb-lines" fill="none" stroke="#299bff" stroke-width="1.05" filter="url(#orbGlow)">
+        <circle cx="180" cy="180" r="112"/><ellipse cx="180" cy="180" rx="112" ry="27"/><ellipse cx="180" cy="180" rx="112" ry="54"/><ellipse cx="180" cy="180" rx="112" ry="82"/><ellipse cx="180" cy="180" rx="30" ry="112"/><ellipse cx="180" cy="180" rx="58" ry="112"/><ellipse cx="180" cy="180" rx="86" ry="112"/>
+      </g>
+      <g class="orb-nodes" fill="#a5dcff" filter="url(#orbGlow)"><circle cx="180" cy="68" r="3"/><circle cx="292" cy="180" r="3"/><circle cx="180" cy="292" r="3"/><circle cx="68" cy="180" r="3"/><circle cx="101" cy="101" r="2"/><circle cx="259" cy="259" r="2"/><circle cx="259" cy="101" r="2"/><circle cx="101" cy="259" r="2"/></g>
+    </svg>
+    <div class="orb-caption"><span></span> LOCAL PROCESSING <b></b> 01 / 06</div>
+    <div class="orb-coordinate">ORBITAL SYSTEM <span>—</span> 01 / 06</div>
+  </div>
+</section>
+<section class="signal-strip" aria-label="Ringkasan platform">
+  <div class="signal-cell"><span class="signal-label">TOOL COLLECTION</span><strong>300</strong><small>Utilitas pilihan</small></div>
+  <div class="signal-cell"><span class="signal-label">WORKSPACES</span><strong>06</strong><small>Kategori terkurasi</small></div>
+  <div class="signal-cell"><span class="signal-label">PROCESSING</span><strong>LOCAL</strong><small>Untuk banyak alat, data di browser</small></div>
+  <div class="signal-cell signal-note"><span class="signal-label">DESIGNED FOR DAILY WORK</span><p>Temukan alat yang tepat.<br>Kerjakan tanpa berpindah-pindah.</p></div>
+</section>
+<section id="categories" class="section categories-section">
+  <div class="section-head"><div><p class="eyebrow">01 / TOOL DIRECTORY</p><h2>Kategori pilihan</h2><p class="section-subtitle">Pilih ruang kerja sesuai kebutuhanmu.</p></div><span class="section-note">BROWSE ALL <b>06</b></span></div>
+  <div id="categoryGrid" class="category-grid"></div>
+</section>
+<section id="popular" class="section popular-section">
+  <div class="section-head"><div><p class="eyebrow">02 / QUICK ACCESS</p><h2>Sering digunakan</h2><p class="section-subtitle">Akses cepat ke beberapa alat praktis.</p></div><span class="section-note">PILIH ALAT</span></div>
+  <div id="popularGrid" class="tool-grid"></div>
+</section>
+<section id="categoryView" class="section listing-view hidden">
+  <button class="back-btn" id="backHome"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 18-6-6 6-6M8 12h13"/></svg>Kembali</button>
+  <p class="eyebrow" id="categoryEyebrow"></p><div class="listing-title-row"><div><h2 id="categoryTitle"></h2><p class="muted" id="categoryDescription"></p></div><span class="listing-index">DIRECTORY / TOOLS</span></div>
+  <div class="listing-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="categorySearch" class="field search" placeholder="Cari di kategori ini..." aria-label="Cari di kategori"></div>
+  <div id="categoryTools" class="tool-grid"></div>
+</section>
+<section id="toolView" class="section tool-view hidden">
+  <button class="back-btn" id="backCategory"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 18-6-6 6-6M8 12h13"/></svg>Kembali ke kategori</button>
+  <p class="eyebrow" id="toolCategory"></p>
+  <div class="tool-heading"><div><h2 id="toolTitle"></h2><p class="muted" id="toolDescription"></p></div><span id="toolStatus" class="badge">SIAP DIGUNAKAN</span></div>
+  <div class="workspace">
+    <div class="workspace-topline"><span>TOOL WORKSPACE</span><span>DAFZZ / LOCAL</span></div>
+    <div id="toolInputArea"></div>
+    <div class="actions"><button class="btn primary" id="processBtn">Jalankan alat <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button><button class="btn" id="resetBtn">Atur ulang</button></div>
+    <p id="status" class="status" aria-live="polite"></p>
+    <div id="previewArea" class="preview hidden"></div>
+    <div id="resultArea" class="result hidden"><label for="output">HASIL</label><textarea id="output" class="field" rows="8" readonly></textarea><div class="actions"><button class="btn" id="copyBtn">Salin hasil</button><button class="btn" id="downloadBtn">Unduh hasil</button></div><a class="btn hidden" id="serverDownloadLink" href="#" rel="nofollow">Unduh hasil dari server</a></div>
+  </div>
+  <div class="section related"><div class="section-head"><div><p class="eyebrow">03 / KEEP EXPLORING</p><h3>Alat terkait</h3></div><span class="section-note">MORE TOOLS</span></div><div id="relatedTools" class="tool-grid"></div></div>
+</section>
+</main>
+<footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-TOOLS</span></span><span>TOOLS FOR EVERYDAY DIGITAL WORK</span><span>© 2026</span></div><div class="footer-bottom"><span>BUILT FOR THE BROWSER</span><span>DESIGNED TO BE USEFUL</span></div></footer>
+<div id="toast" class="toast" role="status"></div>
+<script src="script.js"></script>
+</body>
+</html>

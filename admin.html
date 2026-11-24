@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081321">
+  <title>DAFZZ - Konfigurasi Bot</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">ᙃᴀ̷𝖿ᴢᴢ<span>--Tools</span></a>
+    <nav><a href="/" class="nav-link">Website tools</a></nav>
+    <span class="admin-mark">BOT CONTROL</span>
+  </header>
+  <main class="container admin-container">
+    <section id="authPanel" class="auth-panel hidden">
+      <p class="eyebrow">DAFZZ CONTROL PANEL</p>
+      <h1 id="authTitle">Konfigurasi administrator</h1>
+      <p class="muted" id="authDescription">Masuk untuk mengelola koneksi TikTok, AI, dan katalog tools.</p>
+      <form id="authForm" class="workspace auth-form">
+        <div class="control hidden" id="setupTokenWrap">
+          <label class="control-label" for="setupToken">Token setup sekali pakai</label>
+          <input class="field" type="password" id="setupToken" autocomplete="off" minlength="24">
+          <p class="hint">Ambil token dari nilai ADMIN_SETUP_TOKEN di file .env pada server. Token ini hanya dipakai untuk membuat administrator pertama.</p>
+        </div>
+        <label class="control-label" for="adminPassword">Password administrator</label>
+        <input class="field" type="password" id="adminPassword" autocomplete="current-password" minlength="12" required>
+        <p class="hint" id="authHint">Gunakan password kuat minimal 12 karakter.</p>
+        <button class="btn primary" type="submit" id="authSubmit">Masuk</button>
+        <p class="status" id="authStatus" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="admin-heading">
+        <div>
+          <p class="eyebrow">DAFZZ BOT / CONTROL PANEL</p>
+          <h1>Konfigurasi sistem</h1>
+          <p class="muted">Pengaturan bot TikTok, halaman tools, dan respons AI.</p>
+        </div>
+        <button class="btn" id="logoutBtn" type="button">Keluar</button>
+      </div>
+
+      <div class="metric-grid" id="metrics">
+        <article class="metric-card"><span class="metric-label">TOTAL TOOLS</span><strong id="metricTools">300</strong><small>6 kategori</small></article>
+        <article class="metric-card"><span class="metric-label">DM DITERIMA</span><strong id="metricReceived">0</strong><small>Pesan masuk</small></article>
+        <article class="metric-card"><span class="metric-label">BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons terkirim ke bridge</small></article>
+        <article class="metric-card"><span class="metric-label">HASIL TOOL</span><strong id="metricOutputs">0</strong><small>File/teks tersimpan</small></article>
+      </div>
+
+      <section class="admin-section">
+        <div class="section-title"><div><p class="eyebrow">KONEKSI UTAMA</p><h2>TikTok DM Bridge</h2></div><span class="status-pill" id="bridgeStatus">BELUM DIUJI</span></div>
+        <div class="connection-grid">
+          <div class="info-card">
+            <h3>Status koneksi</h3>
+            <p class="muted" id="bridgeNote">Masukkan token bridge lalu lakukan pengujian.</p>
+            <button class="btn" id="testBridgeBtn" type="button">Uji koneksi TikTok</button>
+          </div>
+          <div class="info-card">
+            <h3>Webhook internal</h3>
+            <p class="muted">Otomatis diatur oleh Docker Compose. Tidak perlu mengubahnya untuk pemasangan standar.</p>
+            <code class="copy-value" id="webhookUrl">/webhooks/tiktok</code>
+          </div>
+        </div>
+        <form id="settingsForm" class="workspace settings-form">
+          <div class="form-section-head"><h3>Konfigurasi bridge</h3><p class="muted">Token dan secret disimpan di server, tidak dikirim ke browser setelah disimpan.</p></div>
+          <div class="control">
+            <label class="control-label" for="bridgeBaseUrl">Alamat API bridge</label>
+            <input class="field" id="bridgeBaseUrl" type="url" placeholder="http://tiktok-bridge:8000" required>
+          </div>
+          <div class="control">
+            <label class="control-label" for="bridgeApiToken">API bearer token</label>
+            <input class="field" id="bridgeApiToken" type="password" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengganti token">
+            <label class="check-row"><input type="checkbox" id="clearBridgeToken"> Hapus token tersimpan</label>
+          </div>
+          <div class="control">
+            <label class="control-label" for="webhookSecret">Webhook signing secret</label>
+            <input class="field" id="webhookSecret" type="password" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengganti secret">
+            <label class="check-row"><input type="checkbox" id="clearWebhookSecret"> Hapus secret tersimpan</label>
+          </div>
+          <div class="divider-line"></div>
+          <div class="form-section-head"><h3>Website dan halaman hasil</h3><p class="muted">URL HTTPS publik digunakan pada link yang dikirim ke DM TikTok.</p></div>
+          <div class="control">
+            <label class="control-label" for="publicBaseUrl">URL publik DAFZZ</label>
+            <input class="field" id="publicBaseUrl" type="url" placeholder="https://domain-kamu.com">
+          </div>
+          <div class="divider-line"></div>
+          <div class="form-section-head"><h3>AI otomatis tanpa API key</h3><p class="muted">Model publik anonim dipakai sebagai balasan saat pesan bukan perintah tool.</p></div>
+          <div class="toggle-line"><div><strong>Aktifkan AI fallback</strong><p class="muted">Jika pesan tidak dikenali, bot mencoba menjawab dengan AI.</p></div><label class="switch"><input id="aiEnabled" type="checkbox"><span></span></label></div>
+          <div class="control">
+            <label class="control-label" for="aiEndpoint">Endpoint AI</label>
+            <input class="field" id="aiEndpoint" type="url" required>
+          </div>
+          <div class="control">
+            <label class="control-label" for="aiModel">Model AI</label>
+            <input class="field" id="aiModel" type="text" required>
+          </div>
+          <div class="control">
+            <label class="control-label" for="fallbackPrefix">Kalimat pembuka balasan tidak dikenal</label>
+            <input class="field" id="fallbackPrefix" type="text" maxlength="120" required>
+          </div>
+          <div class="actions admin-actions">
+            <button class="btn primary" type="submit">Simpan konfigurasi</button>
+            <button class="btn" type="button" id="testAiBtn">Uji AI gratis</button>
+          </div>
+          <p class="status" id="settingsStatus" aria-live="polite"></p>
+          <div class="inline-note">Akses anonim OVHcloud dibatasi 2 permintaan per menit per IP dan model. Saat kuota habis atau layanan tidak tersedia, bot memakai balasan cadangan.</div>
+        </form>
+      </section>
+
+      <section class="admin-section">
+        <div class="section-title"><div><p class="eyebrow">KATALOG SUMBER</p><h2>Enam kategori DAFZZ</h2></div><span class="muted">300 tools</span></div>
+        <div id="categoryRows" class="category-rows"></div>
+      </section>
+
+      <section class="admin-section setup-guide">
+        <p class="eyebrow">PENYAMBUNGAN AKUN</p>
+        <h2>Langkah impor sesi TikTok</h2>
+        <ol>
+          <li>Jalankan bridge TikTok pada server dengan Docker Compose.</li>
+          <li>Login ke akun TikTok milikmu melalui Chrome desktop dan buka inbox.</li>
+          <li>Ikuti panduan upstream untuk mengekspor request inbox dan socket ke dua file lokal. File itu berisi data sesi akun, jadi jangan unggah ke chat, repository, atau website pihak lain.</li>
+          <li>Impor dua file tersebut melalui perintah bridge di server. Setelah selesai, ambil API token dan webhook secret melalui perintah CLI bridge.</li>
+          <li>Masukkan token dan webhook secret ke bagian Konfigurasi bridge di atas, lalu uji koneksi.</li>
+        </ol>
+        <p class="muted small-copy">Panel ini tidak meminta password TikTok. Koneksi dilakukan dengan mengimpor sesi akun milikmu sendiri dari Chrome desktop ke bridge yang berjalan di server. Konektor ini hanya mendukung percakapan satu lawan satu yang sudah ada dan pesan teks. Login QR, pembaruan sesi otomatis, permintaan DM baru, serta kirim/terima media belum didukung.</p>
+        <a class="plain-link" href="https://github.com/KreatixTeam/tiktok-dm-api" target="_blank" rel="noreferrer">Dokumentasi bridge TikTok</a>
+      </section>
+    </section>
+    <div class="footer">DAFZZ BOT <span>·</span> CONTROL PANEL</div>
+  </main>
+  <script src="/admin.js" defer></script>
+</body>
+</html>

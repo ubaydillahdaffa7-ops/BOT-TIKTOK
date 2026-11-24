@@ -1,0 +1,80 @@
+DAFZZ TIKTOK BOT - LAPORAN PEMERIKSAAN BUILD
+============================================
+
+SUMBER KATALOG
+--------------
+- tools.json aktual: 300 entri.
+- Kategori: foto 50, teks 50, file 50, konverter 50, keamanan 50, web 50.
+- Jumlah slug unik: 300.
+- tools.json menjadi sumber kebenaran untuk jumlah dan pembagian kategori.
+- README/QA pada arsip website sumber menyebut tujuh kategori; teks lama itu
+  tidak sesuai dengan katalog aktual. Dokumentasi paket ini telah dikoreksi.
+
+FITUR BOT DAN WEBSITE YANG DITAMBAHKAN
+-------------------------------------
+- Backend Node.js dan Express.
+- Webhook TikTok dengan pemeriksaan HMAC-SHA256, timestamp, event ID, dan
+  deduplikasi event.
+- Perintah .menu, .help, .start, .info, .cancel, enam perintah kategori,
+  dan perintah langsung untuk seluruh slug katalog.
+- Link halaman tool per sesi dengan masa berlaku 24 jam.
+- Upload hasil dari browser ke server dan tautan download privat yang berlaku
+  24 jam. Link unduh juga muncul di halaman tool jika notifikasi DM gagal.
+- File Blob yang dibuat lewat jalur download browser dialihkan ke server saat sesi
+  TikTok aktif agar hasil tetap dapat dikirim sebagai tautan.
+- Panel admin dengan password hash scrypt, session cookie, CSRF token, token
+  setup sekali pakai, pembatasan percobaan login, dan tampilan mengikuti warna DAFZZ.
+- AI fallback anonim tanpa API key dan balasan cadangan bila layanan gagal;
+  kuota anonim eksternal membatasi pemakaian.
+- Docker Compose untuk app, bridge, volume persisten, dan profil Caddy HTTPS.
+
+PENGUJIAN YANG DILAKUKAN PADA PAKET BUILD
+----------------------------------------
+- Pemeriksaan sintaks JavaScript melalui node --check.
+- Uji unit katalog: total, jumlah per kategori, slug unik, dan data wajib.
+- Uji helper tanda tangan webhook: signature benar, body berubah, timestamp
+  kedaluwarsa, dan secret kosong.
+- Uji sanitasi nama file dan validasi URL admin.
+
+BELUM DIUJI
+-----------
+- Belum diuji terhadap akun TikTok nyata karena impor sesi harus dilakukan oleh
+  pemilik akun pada server miliknya.
+- Belum diuji pengiriman DM nyata dan penerimaan webhook live.
+- Belum diuji proses browser end-to-end pada perangkat Android dan desktop.
+- Dependensi npm dan image Docker perlu diunduh saat proses instalasi; runtime
+  server tidak dijalankan di lingkungan pembuatan ZIP ini.
+- Seluruh 300 tool belum diklik dan diuji satu per satu setelah integrasi bot.
+
+BATASAN YANG SUDAH DIKETAHUI DARI WEBSITE SUMBER
+-----------------------------------------------
+- Tidak semua tool merupakan konversi/pemrosesan tingkat profesional.
+- DNS/RDAP/IP memerlukan internet dan layanan eksternal.
+- Fetch lintas domain dapat dibatasi oleh CORS.
+- Sprite Sheet adalah PNG statis, bukan GIF animasi.
+- Annotasi Gambar bukan OCR otomatis.
+- Analisis Dimensi Foto bukan deteksi wajah.
+- Penghapusan objek/latar menggunakan editor manual, bukan AI inpainting.
+- PDF Metadata Inspector dan pencarian teks PDF membutuhkan PDF.js dari CDN.
+- PDF scan yang hanya berisi gambar tidak dapat dicari tanpa OCR.
+- Ekspor PDF/Word/Excel/PPT dapat menyederhanakan tata letak dokumen.
+- Konversi AVIF bergantung dukungan browser.
+
+BATASAN CONNECTOR TIKTOK
+------------------------
+Konektor pihak ketiga yang digunakan bersifat tidak resmi dan eksperimental.
+Menurut dokumentasi upstream, dukungan terbatas ke percakapan satu lawan satu
+yang sudah ada dan pesan teks. Tidak mendukung media upload/download, login QR,
+pembaruan sesi otomatis, grup, permintaan DM baru, atau pengiriman ke username
+sembarang. Protokol dapat berubah tanpa pemberitahuan.
+
+STATUS
+------
+Build berisi website sumber, katalog 300 tools, backend bot, panel admin,
+halaman hasil dan download, serta installer untuk bridge eksternal. Build ini
+sudah melewati pemeriksaan statis dan unit test yang tercantum di atas. Build
+belum bisa dinyatakan bebas bug atau siap produksi sebelum dipasang, sesi akun
+TikTok diimpor, dan pengujian live dilakukan.
+
+
+Catatan paket datar: seluruh file proyek dipindahkan ke folder utama ZIP; file tidak dihapus.

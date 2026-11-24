@@ -1,0 +1,9 @@
+{
+  "name": "DAFZZ-TOOLS | Digital Workspace",
+  "short_name": "DAFZZ-TOOLS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070d18",
+  "theme_color": "#070d18",
+  "description": "300 utilitas digital untuk foto, teks, file, konverter, keamanan, web, dan QR."
+}
