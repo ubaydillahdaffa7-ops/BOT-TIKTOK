@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'dafzz-tools-v11';
+const CACHE_NAME = 'dafzz-tools-v12';
 const CORE_FILES = [
   './',
   './index.html',
@@ -8,7 +8,13 @@ const CORE_FILES = [
   './script.js',
   './qrcode-local.js',
   './tools.json',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+  './bot.html',
+  './bot.css',
+  './bot-dashboard.js',
+  './admin.html',
+  './admin.css',
+  './admin.js'
 ];
 
 // QR libraries are cached separately: a CDN outage must not prevent the app

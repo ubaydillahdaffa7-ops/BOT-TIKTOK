@@ -10,16 +10,20 @@ const DEFAULTS = {
     bridgeBaseUrl: process.env.TIKTOK_BRIDGE_URL || 'http://tiktok-bridge:8000',
     bridgeApiToken: '',
     webhookSecret: '',
+    botEnabled: true,
     aiEnabled: true,
-    aiEndpoint: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
-    aiModel: 'Qwen3.6-27B',
+    aiMode: 'pollinations',
+    aiEndpoint: 'https://text.pollinations.ai/openai',
+    aiModel: 'openai',
+    aiApiKey: '',
     fallbackPrefix: 'Maaf kamu ngetik apa mpruy',
     publicBaseUrl: process.env.APP_PUBLIC_URL || ''
   },
   sessions: {},
   downloads: {},
   processedEvents: {},
-  stats: { received: 0, replied: 0, toolLinks: 0, outputs: 0 }
+  stats: { received: 0, replied: 0, aiReplies: 0, toolLinks: 0, outputs: 0 },
+  logs: []
 };
 
 let db = structuredClone(DEFAULTS);
@@ -32,8 +36,18 @@ export async function initStore() {
     db = {
       ...structuredClone(DEFAULTS), ...stored,
       settings: { ...DEFAULTS.settings, ...(stored.settings || {}) },
-      stats: { ...DEFAULTS.stats, ...(stored.stats || {}) }
+      stats: { ...DEFAULTS.stats, ...(stored.stats || {}) },
+      logs: Array.isArray(stored.logs) ? stored.logs.slice(0, 120) : []
     };
+    // Migrate the previous OVH/Qwen anonymous-AI defaults to the Pollinations
+    // configuration requested for this build. Custom mode is explicit.
+    if (!stored.settings?.aiMode && String(stored.settings?.aiEndpoint || '').includes('ovh.endpoints')) {
+      db.settings.aiMode = 'pollinations';
+      db.settings.aiEndpoint = 'https://text.pollinations.ai/openai';
+      db.settings.aiModel = 'openai';
+      db.settings.aiApiKey = '';
+    }
+    if (!['pollinations', 'custom'].includes(db.settings.aiMode)) db.settings.aiMode = 'pollinations';
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
     await persist();
@@ -42,6 +56,17 @@ export async function initStore() {
 }
 
 export function getDb() { return db; }
+
+export function logActivity(type, message) {
+  if (!Array.isArray(db.logs)) db.logs = [];
+  db.logs.unshift({
+    id: crypto.randomUUID(),
+    type: String(type || 'info').slice(0, 32),
+    message: String(message || '').slice(0, 220),
+    at: new Date().toISOString()
+  });
+  db.logs = db.logs.slice(0, 120);
+}
 
 export function persist() {
   const snapshot = JSON.stringify(db, null, 2);

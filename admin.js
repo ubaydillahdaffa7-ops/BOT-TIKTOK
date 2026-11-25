@@ -14,6 +14,14 @@ async function api(url, options = {}) {
   return data;
 }
 
+function setAIFields() {
+  const custom = $('aiMode').value === 'custom';
+  $('aiCustomFields').classList.toggle('hidden', !custom);
+  $('pollinationsInfo').classList.toggle('hidden', custom);
+  $('aiEndpoint').required = custom;
+  $('aiModel').required = custom;
+}
+
 function setStatus(id, message, isError = false) {
   const node = $(id);
   node.textContent = message;
@@ -53,6 +61,7 @@ async function loadOverview() {
   $('metricTools').textContent = data.catalog.total;
   $('metricReceived').textContent = data.stats.received || 0;
   $('metricReplied').textContent = data.stats.replied || 0;
+  $('metricAiReplies').textContent = data.stats.aiReplies || 0;
   $('metricOutputs').textContent = data.stats.outputs || 0;
   const bridgePill = $('bridgeStatus');
   bridgePill.textContent = data.bridge.connected ? 'TERHUBUNG' : (data.bridge.configured ? 'BELUM SIAP' : 'BELUM DIATUR');
@@ -65,9 +74,14 @@ async function loadOverview() {
   $('clearBridgeToken').checked = false;
   $('clearWebhookSecret').checked = false;
   $('publicBaseUrl').value = s.publicBaseUrl || '';
+  $('botEnabled').checked = Boolean(s.botEnabled);
   $('aiEnabled').checked = Boolean(s.aiEnabled);
-  $('aiEndpoint').value = s.aiEndpoint;
-  $('aiModel').value = s.aiModel;
+  $('aiMode').value = s.aiMode || 'pollinations';
+  $('aiEndpoint').value = s.aiEndpoint || '';
+  $('aiModel').value = s.aiModel || '';
+  $('aiApiKey').value = '';
+  $('clearAiApiKey').checked = false;
+  setAIFields();
   $('fallbackPrefix').value = s.fallbackPrefix;
   $('webhookUrl').textContent = 'http://app:3000/webhooks/tiktok';
   $('categoryRows').innerHTML = data.catalog.categories.map(category => `
@@ -104,15 +118,21 @@ $('settingsForm').addEventListener('submit', async event => {
     clearBridgeToken: $('clearBridgeToken').checked,
     clearWebhookSecret: $('clearWebhookSecret').checked,
     publicBaseUrl: $('publicBaseUrl').value.trim(),
+    botEnabled: $('botEnabled').checked,
     aiEnabled: $('aiEnabled').checked,
+    aiMode: $('aiMode').value,
     aiEndpoint: $('aiEndpoint').value.trim(),
     aiModel: $('aiModel').value.trim(),
+    aiApiKey: $('aiApiKey').value,
+    clearAiApiKey: $('clearAiApiKey').checked,
     fallbackPrefix: $('fallbackPrefix').value.trim()
   };
   try {
     await api('/api/admin/settings', { method: 'POST', body: JSON.stringify(body) });
     $('bridgeApiToken').value = '';
     $('webhookSecret').value = '';
+    $('aiApiKey').value = '';
+    $('clearAiApiKey').checked = false;
     $('clearBridgeToken').checked = false;
     $('clearWebhookSecret').checked = false;
     setStatus('settingsStatus', 'Konfigurasi berhasil disimpan di server.');
@@ -130,7 +150,7 @@ $('testBridgeBtn').addEventListener('click', async () => {
 });
 
 $('testAiBtn').addEventListener('click', async () => {
-  setStatus('settingsStatus', 'Mengirim permintaan uji ke AI gratis...');
+  setStatus('settingsStatus', 'Menguji koneksi AI yang sedang dipilih...');
   try {
     const data = await api('/api/admin/test-ai', { method: 'POST', body: '{}' });
     setStatus('settingsStatus', `${data.note} ${data.answer}` , !data.ok);
@@ -141,6 +161,8 @@ $('logoutBtn').addEventListener('click', async () => {
   try { await api('/api/admin/logout', { method: 'POST', body: '{}' }); }
   finally { await refreshState(); }
 });
+
+$('aiMode').addEventListener('change', setAIFields);
 
 refreshState().catch(error => {
   show('authPanel');

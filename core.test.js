@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { verifyTikTokBridgeSignature, safeFileName, isValidHttpUrl } from './security.js';
 import { getCatalogStats, findCatalogTool } from './bot.js';
+import { askFreeAI, resolveAIConfiguration } from './ai.js';
+import { getDb } from './store.js';
 
 const catalog = JSON.parse(fs.readFileSync(new URL('./tools.json', import.meta.url), 'utf8'));
 
@@ -61,4 +63,78 @@ test('admin URL validator accepts only HTTP and HTTPS URLs', () => {
   assert.equal(isValidHttpUrl('http://127.0.0.1:3000'), true);
   assert.equal(isValidHttpUrl('javascript:alert(1)'), false);
   assert.equal(isValidHttpUrl('not a url'), false);
+});
+
+
+test('Pollinations automatic AI uses the tested endpoint and alias without a key', () => {
+  const config = resolveAIConfiguration({ aiMode: 'pollinations', aiEndpoint: 'https://wrong.example', aiModel: 'wrong', aiApiKey: 'must-not-be-used' });
+  assert.equal(config.mode, 'pollinations');
+  assert.equal(config.endpoint, 'https://text.pollinations.ai/openai');
+  assert.equal(config.model, 'openai');
+  assert.equal(config.apiKey, '');
+});
+
+test('manual AI mode keeps the administrator endpoint, model, and key', () => {
+  const config = resolveAIConfiguration({ aiMode: 'custom', aiEndpoint: 'https://api.example/v1/chat/completions', aiModel: 'example/chat-model', aiApiKey: 'secret-test-value' });
+  assert.equal(config.mode, 'custom');
+  assert.equal(config.endpoint, 'https://api.example/v1/chat/completions');
+  assert.equal(config.model, 'example/chat-model');
+  assert.equal(config.apiKey, 'secret-test-value');
+});
+
+
+test('Pollinations fallback sends a POST with the tested alias and no API key', async () => {
+  const settings = getDb().settings;
+  const previousSettings = { ...settings };
+  const previousFetch = globalThis.fetch;
+  let captured;
+  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', fallbackPrefix: 'DAFZZ:' });
+  globalThis.fetch = async (url, options) => {
+    captured = { url: String(url), options };
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Koneksi AI aktif.' } }] }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  try {
+    const answer = await askFreeAI('Uji koneksi');
+    assert.equal(captured.url, 'https://text.pollinations.ai/openai');
+    assert.equal(captured.options.method, 'POST');
+    assert.equal(captured.options.headers.Authorization, undefined);
+    assert.equal(JSON.parse(captured.options.body).model, 'openai');
+    assert.match(answer, /Koneksi AI aktif/);
+  } finally {
+    globalThis.fetch = previousFetch;
+    Object.assign(settings, previousSettings);
+  }
+});
+
+test('manual AI fallback sends the API key only as a server-side bearer header', async () => {
+  const settings = getDb().settings;
+  const previousSettings = { ...settings };
+  const previousFetch = globalThis.fetch;
+  let captured;
+  Object.assign(settings, {
+    aiEnabled: true,
+    aiMode: 'custom',
+    aiEndpoint: 'https://api.example/v1/chat/completions',
+    aiModel: 'example/chat-model',
+    aiApiKey: 'secret-test-value',
+    fallbackPrefix: 'DAFZZ:'
+  });
+  globalThis.fetch = async (url, options) => {
+    captured = { url: String(url), options };
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Jawaban manual aktif.' } }] }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  try {
+    const answer = await askFreeAI('Uji mode manual');
+    assert.equal(captured.url, 'https://api.example/v1/chat/completions');
+    assert.equal(captured.options.headers.Authorization, 'Bearer secret-test-value');
+    assert.equal(JSON.parse(captured.options.body).model, 'example/chat-model');
+    assert.match(answer, /Jawaban manual aktif/);
+  } finally {
+    globalThis.fetch = previousFetch;
+    Object.assign(settings, previousSettings);
+  }
 });

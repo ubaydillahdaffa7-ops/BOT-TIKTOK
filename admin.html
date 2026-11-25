@@ -11,7 +11,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/">ᙃᴀ̷𝖿ᴢᴢ<span>--Tools</span></a>
-    <nav><a href="/" class="nav-link">Website tools</a></nav>
+    <nav><a href="/" class="nav-link">Menu Tools</a><a href="/bot" class="nav-link">Menu Bot TT</a></nav>
     <span class="admin-mark">BOT CONTROL</span>
   </header>
   <main class="container admin-container">
@@ -40,13 +40,14 @@
           <h1>Konfigurasi sistem</h1>
           <p class="muted">Pengaturan bot TikTok, halaman tools, dan respons AI.</p>
         </div>
-        <button class="btn" id="logoutBtn" type="button">Keluar</button>
+        <div class="admin-heading-actions"><a class="btn" href="/bot">Buka Menu Bot TT</a><button class="btn" id="logoutBtn" type="button">Keluar</button></div>
       </div>
 
       <div class="metric-grid" id="metrics">
         <article class="metric-card"><span class="metric-label">TOTAL TOOLS</span><strong id="metricTools">300</strong><small>6 kategori</small></article>
         <article class="metric-card"><span class="metric-label">DM DITERIMA</span><strong id="metricReceived">0</strong><small>Pesan masuk</small></article>
         <article class="metric-card"><span class="metric-label">BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons terkirim ke bridge</small></article>
+        <article class="metric-card"><span class="metric-label">BALASAN AI</span><strong id="metricAiReplies">0</strong><small>Jawaban fallback AI</small></article>
         <article class="metric-card"><span class="metric-label">HASIL TOOL</span><strong id="metricOutputs">0</strong><small>File/teks tersimpan</small></article>
       </div>
 
@@ -65,6 +66,9 @@
           </div>
         </div>
         <form id="settingsForm" class="workspace settings-form">
+          <div class="form-section-head"><h3>Kontrol bot</h3><p class="muted">Bot OFF akan mengabaikan webhook pesan baru, tanpa menghapus pengaturan atau sesi yang tersimpan.</p></div>
+          <div class="toggle-line"><div><strong>Aktifkan bot TikTok</strong><p class="muted">Nyalakan atau hentikan balasan otomatis.</p></div><label class="switch"><input id="botEnabled" type="checkbox"><span></span></label></div>
+          <div class="divider-line"></div>
           <div class="form-section-head"><h3>Konfigurasi bridge</h3><p class="muted">Token dan secret disimpan di server, tidak dikirim ke browser setelah disimpan.</p></div>
           <div class="control">
             <label class="control-label" for="bridgeBaseUrl">Alamat API bridge</label>
@@ -87,15 +91,30 @@
             <input class="field" id="publicBaseUrl" type="url" placeholder="https://domain-kamu.com">
           </div>
           <div class="divider-line"></div>
-          <div class="form-section-head"><h3>AI otomatis tanpa API key</h3><p class="muted">Model publik anonim dipakai sebagai balasan saat pesan bukan perintah tool.</p></div>
+          <div class="form-section-head"><h3>Konfigurasi AI</h3><p class="muted">AI digunakan otomatis saat pesan tidak cocok dengan perintah atau katalog tools.</p></div>
           <div class="toggle-line"><div><strong>Aktifkan AI fallback</strong><p class="muted">Jika pesan tidak dikenali, bot mencoba menjawab dengan AI.</p></div><label class="switch"><input id="aiEnabled" type="checkbox"><span></span></label></div>
           <div class="control">
-            <label class="control-label" for="aiEndpoint">Endpoint AI</label>
-            <input class="field" id="aiEndpoint" type="url" required>
+            <label class="control-label" for="aiMode">Mode AI</label>
+            <select class="field" id="aiMode">
+              <option value="pollinations">Pollinations AI otomatis — tanpa API key</option>
+              <option value="custom">AI manual — API key sendiri</option>
+            </select>
           </div>
-          <div class="control">
-            <label class="control-label" for="aiModel">Model AI</label>
-            <input class="field" id="aiModel" type="text" required>
+          <div id="pollinationsInfo" class="inline-note">Mode otomatis memakai endpoint Pollinations yang sudah diuji pada DAFZZ AI v3.0: text.pollinations.ai/openai, model openai. Tidak perlu mengisi API key pada mode ini.</div>
+          <div id="aiCustomFields" class="hidden">
+            <div class="control">
+              <label class="control-label" for="aiEndpoint">Endpoint OpenAI-compatible</label>
+              <input class="field" id="aiEndpoint" type="url" placeholder="https://provider.example/v1/chat/completions">
+            </div>
+            <div class="control">
+              <label class="control-label" for="aiModel">Model AI</label>
+              <input class="field" id="aiModel" type="text" placeholder="provider/model">
+            </div>
+            <div class="control">
+              <label class="control-label" for="aiApiKey">API key (opsional sesuai penyedia)</label>
+              <input class="field" id="aiApiKey" type="password" autocomplete="new-password" placeholder="Masukkan API key. Kosongkan untuk mempertahankan key lama.">
+              <label class="check-row"><input type="checkbox" id="clearAiApiKey"> Hapus API key tersimpan</label>
+            </div>
           </div>
           <div class="control">
             <label class="control-label" for="fallbackPrefix">Kalimat pembuka balasan tidak dikenal</label>
@@ -103,10 +122,10 @@
           </div>
           <div class="actions admin-actions">
             <button class="btn primary" type="submit">Simpan konfigurasi</button>
-            <button class="btn" type="button" id="testAiBtn">Uji AI gratis</button>
+            <button class="btn" type="button" id="testAiBtn">Uji koneksi AI</button>
           </div>
           <p class="status" id="settingsStatus" aria-live="polite"></p>
-          <div class="inline-note">Akses anonim OVHcloud dibatasi 2 permintaan per menit per IP dan model. Saat kuota habis atau layanan tidak tersedia, bot memakai balasan cadangan.</div>
+          <div class="inline-note">API key manual disimpan hanya di server pada folder data privat dan tidak dikirim kembali ke browser. Penggunaan AI tetap mengikuti batas dan ketentuan penyedia layanan.</div>
         </form>
       </section>
 

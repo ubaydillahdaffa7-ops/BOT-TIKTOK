@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070d18">
+  <meta name="description" content="Dashboard kendali bot TikTok DAFZZ.">
+  <title>DAFZZ — Menu Bot TT</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/bot.css">
+</head>
+<body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <div class="ambient-rail rail-one" aria-hidden="true"></div>
+  <div class="ambient-rail rail-two" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="DAFZZ beranda"><span class="brand-mark">D</span><span class="brand-name">DAFZZ<span class="brand-blue">-TOOLS</span></span></a>
+    <nav aria-label="Navigasi utama">
+      <a class="nav-link" href="/">Menu Tools</a>
+      <a class="nav-link active" href="/bot">Menu Bot TT</a>
+      <a class="nav-link" href="/admin">Konfigurasi</a>
+    </nav>
+  </header>
+
+  <main class="container bot-container">
+    <section id="loginGate" class="bot-login-gate hidden">
+      <p class="eyebrow">DAFZZ BOT / ADMIN ACCESS</p>
+      <h1>Masuk untuk membuka dashboard.</h1>
+      <p class="muted">Status bot, statistik DM, konfigurasi AI, dan log aktivitas hanya ditampilkan kepada administrator.</p>
+      <a class="btn primary" href="/admin">Buka halaman administrator</a>
+    </section>
+
+    <div id="dashboardContent" class="hidden">
+      <section class="bot-hero">
+        <div>
+          <p class="eyebrow"><span class="live-dot"></span> DAFZZ BOT / CONTROL CENTER <span class="eyebrow-rule"></span> 02 / 02</p>
+          <h1>Menu <span>Bot TT.</span></h1>
+          <p class="bot-intro">Pantau koneksi TikTok, kendalikan balasan otomatis, periksa penggunaan AI, dan lihat aktivitas bot dari satu tempat.</p>
+          <div class="bot-hero-meta"><span class="meta-mark"></span><span>300 TOOLS TERHUBUNG</span><i></i><span>6 KATEGORI</span><i></i><span>AI FALLBACK</span></div>
+        </div>
+        <div class="bot-control-card">
+          <div class="bot-control-top"><span>BOT STATUS</span><span class="bot-signal" id="botSignal"></span></div>
+          <strong id="botStatusText">MEMUAT STATUS</strong>
+          <p id="botStatusNote">Mengambil status bot dari server.</p>
+          <button class="btn primary bot-toggle" id="botToggle" type="button" disabled>Memuat...</button>
+          <small id="lastRefresh">Pembaruan otomatis aktif</small>
+        </div>
+      </section>
+
+      <section class="bot-metrics" aria-label="Statistik bot">
+        <article class="bot-metric"><span>DM DITERIMA</span><strong id="metricReceived">0</strong><small>Total pesan masuk diproses</small></article>
+        <article class="bot-metric"><span>BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons dikirim melalui bridge</small></article>
+        <article class="bot-metric"><span>BALASAN AI</span><strong id="metricAiReplies">0</strong><small>Fallback ke model AI</small></article>
+        <article class="bot-metric"><span>HASIL TERSIMPAN</span><strong id="metricOutputs">0</strong><small>File atau teks keluaran</small></article>
+        <article class="bot-metric"><span>SESI TOOL AKTIF</span><strong id="metricSessions">0</strong><small>Sesi browser yang belum kedaluwarsa</small></article>
+      </section>
+
+      <section class="bot-section">
+        <div class="bot-section-heading"><div><p class="eyebrow">01 / SYSTEM CONNECTIONS</p><h2>Koneksi dan penyimpanan</h2></div><button class="btn small-btn" id="refreshBtn" type="button">Perbarui status</button></div>
+        <div class="bot-card-grid">
+          <article class="bot-info-card">
+            <div class="bot-card-head"><span class="bot-card-index">A / 01</span><span class="state-pill" id="bridgePill">MEMUAT</span></div>
+            <h3>TikTok DM Bridge</h3>
+            <p id="bridgeNote">Memeriksa kesiapan bridge.</p>
+            <div class="bot-card-foot"><span>API BRIDGE</span><strong id="bridgeAddress">Belum diatur</strong></div>
+          </article>
+          <article class="bot-info-card">
+            <div class="bot-card-head"><span class="bot-card-index">A / 02</span><span class="state-pill" id="webhookPill">MEMUAT</span></div>
+            <h3>Webhook TikTok</h3>
+            <p>Jalur penerimaan event dari bridge menuju server DAFZZ.</p>
+            <div class="bot-card-foot"><span>ENDPOINT</span><strong id="webhookAddress">/webhooks/tiktok</strong></div>
+          </article>
+          <article class="bot-info-card">
+            <div class="bot-card-head"><span class="bot-card-index">A / 03</span><span class="state-pill good">PERSISTEN</span></div>
+            <h3>Penyimpanan sesi</h3>
+            <p id="storageNote">Data aplikasi disimpan pada volume privat server.</p>
+            <div class="bot-card-foot"><span>HASIL AKTIF</span><strong id="storedResults">0</strong></div>
+          </article>
+          <article class="bot-info-card ai-info-card">
+            <div class="bot-card-head"><span class="bot-card-index">A / 04</span><span class="state-pill" id="aiPill">MEMUAT</span></div>
+            <h3 id="aiProvider">Pollinations AI</h3>
+            <p id="aiNote">AI fallback digunakan saat perintah atau tools tidak cocok.</p>
+            <div class="bot-card-foot"><span>MODEL</span><strong id="aiModel">openai</strong></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="bot-section bot-bottom-grid">
+        <div class="activity-panel">
+          <div class="bot-section-heading"><div><p class="eyebrow">02 / LIVE ACTIVITY</p><h2>Log aktivitas</h2></div><span class="section-note">30 AKTIVITAS TERBARU</span></div>
+          <div id="activityList" class="activity-list"><div class="activity-empty">Belum ada aktivitas yang tercatat.</div></div>
+        </div>
+        <aside class="bot-shortcuts">
+          <p class="eyebrow">03 / QUICK ACCESS</p>
+          <h2>Pengaturan bot</h2>
+          <p class="muted">Atur token bridge, webhook, URL publik, mode AI, dan API key melalui panel administrator.</p>
+          <a class="btn primary" href="/admin">Buka konfigurasi</a>
+          <a class="btn" href="/">Kembali ke Menu Tools</a>
+          <div class="shortcut-rule"></div>
+          <span class="shortcut-label">PENYIMPANAN SERVER</span>
+          <strong>APP DATA / TIKTOK VOLUME</strong>
+          <small>Secret dan sesi tidak ditampilkan di dashboard.</small>
+        </aside>
+      </section>
+      <p class="bot-disclaimer">Kesiapan bridge menunjukkan endpoint bridge merespons, bukan jaminan sesi TikTok selalu aktif. Pengiriman dan penerimaan DM nyata tetap bergantung pada koneksi akun dan kondisi layanan TikTok.</p>
+    </div>
+  </main>
+  <footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-BOT TT</span></span><span>BOT CONTROL CENTER</span><span>© 2026</span></div></footer>
+  <div id="botToast" class="toast" role="status"></div>
+  <script src="/bot-dashboard.js" defer></script>
+</body>
+</html>

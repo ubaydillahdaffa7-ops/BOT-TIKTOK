@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import express from 'express';
 import session from 'express-session';
 import multer from 'multer';
-import { DATA_DIR, getDb, getSessionSecret, initStore, makePasswordRecord, persist, pruneExpired, randomToken, verifyPassword } from './store.js';
+import { DATA_DIR, getDb, getSessionSecret, initStore, logActivity, makePasswordRecord, persist, pruneExpired, randomToken, verifyPassword } from './store.js';
 import { verifyTikTokBridgeSignature, safeFileName, isValidHttpUrl } from './security.js';
 import { handleTikTokEvent, getCatalogStats, findCatalogTool, sendTikTokText } from './bot.js';
 import { testFreeAI } from './ai.js';
@@ -97,6 +97,8 @@ app.post('/webhooks/tiktok', express.raw({ type: 'application/json', limit: '64k
     delete db.processedEvents[headerId];
     await persist();
     console.error('[tiktok-webhook]', error?.message || error);
+    logActivity('error', 'Pemrosesan webhook TikTok mengalami kesalahan');
+    await persist();
     return res.status(500).json({ accepted: false });
   }
 });
@@ -187,18 +189,34 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
       bridge.note = response.ok ? 'Bridge siap menerima DM' : `Bridge merespons HTTP ${response.status}`;
     } catch { bridge.note = 'Bridge belum dapat dijangkau'; }
   }
+  const activeSessions = Object.values(db.sessions).filter(item => item?.expiresAt > Date.now()).length;
+  const storedResults = Object.values(db.downloads).filter(item => item?.expiresAt > Date.now()).length;
+  const aiMode = db.settings.aiMode === 'custom' ? 'custom' : 'pollinations';
   res.json({
     catalog,
     stats: db.stats,
     bridge,
-    ai: { enabled: db.settings.aiEnabled, endpoint: db.settings.aiEndpoint, model: db.settings.aiModel, mode: 'anonymous-no-key' },
+    bot: { enabled: db.settings.botEnabled !== false, webhookPath: '/webhooks/tiktok', activeSessions, storedResults },
+    storage: { location: 'APP_DATA_DIR/.data', activeSessions, storedResults, bridgeVolume: 'tiktok-data (Docker volume)' },
+    ai: {
+      enabled: db.settings.aiEnabled,
+      mode: aiMode,
+      provider: aiMode === 'pollinations' ? 'Pollinations AI' : 'Custom OpenAI-compatible API',
+      endpoint: aiMode === 'pollinations' ? 'https://text.pollinations.ai/openai' : db.settings.aiEndpoint,
+      model: aiMode === 'pollinations' ? 'openai' : db.settings.aiModel,
+      apiKeySet: Boolean(db.settings.aiApiKey)
+    },
+    logs: Array.isArray(db.logs) ? db.logs.slice(0, 30) : [],
     settings: {
       bridgeBaseUrl: db.settings.bridgeBaseUrl,
       bridgeTokenSet: Boolean(db.settings.bridgeApiToken),
       webhookSecretSet: Boolean(db.settings.webhookSecret),
+      botEnabled: db.settings.botEnabled !== false,
       aiEnabled: db.settings.aiEnabled,
-      aiEndpoint: db.settings.aiEndpoint,
-      aiModel: db.settings.aiModel,
+      aiMode,
+      aiEndpoint: aiMode === 'pollinations' ? 'https://text.pollinations.ai/openai' : db.settings.aiEndpoint,
+      aiModel: aiMode === 'pollinations' ? 'openai' : db.settings.aiModel,
+      aiApiKeySet: Boolean(db.settings.aiApiKey),
       fallbackPrefix: db.settings.fallbackPrefix,
       publicBaseUrl: db.settings.publicBaseUrl
     }
@@ -208,6 +226,7 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
 app.post('/api/admin/settings', requireAdmin, ensureCsrf, async (req, res) => {
   const body = req.body || {};
   const settings = getDb().settings;
+  const previousBotEnabled = settings.botEnabled !== false;
   if (typeof body.bridgeBaseUrl === 'string' && body.bridgeBaseUrl.trim()) {
     if (!isValidHttpUrl(body.bridgeBaseUrl.trim())) return sendError(res, 400, 'Alamat bridge harus URL HTTP atau HTTPS yang valid.');
     settings.bridgeBaseUrl = body.bridgeBaseUrl.trim().replace(/\/$/, '');
@@ -216,18 +235,36 @@ app.post('/api/admin/settings', requireAdmin, ensureCsrf, async (req, res) => {
   if (typeof body.webhookSecret === 'string' && body.webhookSecret.trim()) settings.webhookSecret = body.webhookSecret.trim();
   if (body.clearBridgeToken === true) settings.bridgeApiToken = '';
   if (body.clearWebhookSecret === true) settings.webhookSecret = '';
+  if (typeof body.botEnabled === 'boolean') settings.botEnabled = body.botEnabled;
   if (typeof body.aiEnabled === 'boolean') settings.aiEnabled = body.aiEnabled;
-  if (typeof body.aiEndpoint === 'string' && body.aiEndpoint.trim()) {
-    if (!isValidHttpUrl(body.aiEndpoint.trim()) || !body.aiEndpoint.startsWith('https://')) return sendError(res, 400, 'Endpoint AI harus URL HTTPS.');
-    settings.aiEndpoint = body.aiEndpoint.trim();
+  if (body.aiMode === 'pollinations' || body.aiMode === 'custom') settings.aiMode = body.aiMode;
+  if (settings.aiMode === 'pollinations') {
+    settings.aiEndpoint = 'https://text.pollinations.ai/openai';
+    settings.aiModel = 'openai';
+    settings.aiApiKey = '';
+  } else {
+    if (typeof body.aiEndpoint === 'string' && body.aiEndpoint.trim()) {
+      if (!isValidHttpUrl(body.aiEndpoint.trim()) || !body.aiEndpoint.trim().startsWith('https://')) return sendError(res, 400, 'Endpoint AI harus URL HTTPS.');
+      settings.aiEndpoint = body.aiEndpoint.trim();
+    }
+    if (typeof body.aiModel === 'string' && /^[\w./:-]{2,120}$/.test(body.aiModel.trim())) settings.aiModel = body.aiModel.trim();
+    if (!settings.aiEndpoint || !settings.aiModel) return sendError(res, 400, 'Endpoint dan model AI manual wajib diisi.');
   }
-  if (typeof body.aiModel === 'string' && /^[\w./:-]{2,120}$/.test(body.aiModel.trim())) settings.aiModel = body.aiModel.trim();
+  if (typeof body.aiApiKey === 'string' && body.aiApiKey.trim()) {
+    if (body.aiApiKey.length > 1000) return sendError(res, 400, 'API key terlalu panjang.');
+    settings.aiApiKey = body.aiApiKey.trim();
+  }
+  if (body.clearAiApiKey === true) settings.aiApiKey = '';
   if (typeof body.fallbackPrefix === 'string' && body.fallbackPrefix.trim().length <= 120) settings.fallbackPrefix = body.fallbackPrefix.trim();
   if (typeof body.publicBaseUrl === 'string') {
     const value = body.publicBaseUrl.trim();
     if (value && (!isValidHttpUrl(value) || !value.startsWith('https://'))) return sendError(res, 400, 'URL publik harus HTTPS.');
     settings.publicBaseUrl = value.replace(/\/$/, '');
   }
+  if (typeof body.botEnabled === 'boolean' && previousBotEnabled !== settings.botEnabled) {
+    logActivity(settings.botEnabled ? 'bot_on' : 'bot_off', settings.botEnabled ? 'Bot TikTok dinyalakan' : 'Bot TikTok dimatikan');
+  }
+  logActivity('settings_saved', 'Konfigurasi bot dan AI diperbarui');
   await persist();
   return res.json({ ok: true });
 });
@@ -242,14 +279,17 @@ app.post('/api/admin/test-bridge', requireAdmin, ensureCsrf, async (_req, res) =
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) return sendError(res, response.status, data.detail || 'Bridge belum siap.');
+    logActivity('bridge_test', 'Uji koneksi bridge berhasil');
+    await persist();
     return res.json({ ok: true, status: data });
   } catch (error) { return sendError(res, 502, error.message || 'Bridge tidak dapat dijangkau.'); }
 });
 
 app.post('/api/admin/test-ai', requireAdmin, ensureCsrf, async (_req, res) => {
-  const answer = await testFreeAI();
-  const fallback = answer.includes('belum bisa memahami') || answer.includes('mencapai batas') || answer.includes('terlalu lama') || answer.includes('Coba lagi nanti');
-  return res.json({ ok: !fallback, answer, note: fallback ? 'AI belum berhasil menjawab; periksa endpoint, model, atau batas permintaan gratis.' : 'AI memberi respons.' });
+  const result = await testFreeAI();
+  logActivity(result.ok ? 'ai_test' : 'ai_error', result.ok ? 'Uji koneksi AI berhasil' : 'Uji koneksi AI gagal');
+  await persist();
+  return res.json({ ok: result.ok, answer: result.answer, note: result.ok ? 'AI memberi respons.' : 'AI belum berhasil menjawab. Periksa endpoint/model manual atau ketersediaan Pollinations.' });
 });
 
 app.post('/api/run/:token/result', upload.single('file'), async (req, res) => {
@@ -280,6 +320,7 @@ app.post('/api/run/:token/result', upload.single('file'), async (req, res) => {
   runSession.lastResultAt = Date.now();
   runSession.state = 'result-ready';
   db.stats.outputs += 1;
+  logActivity('result_saved', `Hasil tool ${runSession.toolSlug} disimpan`);
   await persist();
 
   const base = publicOrigin(req);
@@ -326,6 +367,7 @@ app.get('/download/:token', async (req, res) => {
 });
 
 app.get('/admin', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')));
+app.get('/bot', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'bot.html')));
 app.get('/run/:token', (req, res) => {
   const entry = getDb().sessions[req.params.token];
   if (!entry || entry.expiresAt <= Date.now()) return res.status(410).send('Sesi tool kedaluwarsa. Jalankan perintah tool kembali dari TikTok.');

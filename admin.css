@@ -3,3 +3,7 @@
 @media(max-width:440px){.metric-card{padding:13px}.metric-card strong{font-size:26px}.category-rows{grid-template-columns:1fr}.section-title{align-items:flex-start;flex-direction:column}.admin-heading h1{font-size:34px}}
 
 .config-nav-link{color:var(--muted);text-decoration:none;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:6px}.config-nav-link:hover{color:var(--text);border-color:var(--blue);background:var(--panel2)}
+
+.admin-heading-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.metric-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.settings-form select.field{width:100%;background:#0b1727;color:var(--text);border:1px solid #29425e;padding:12px;border-radius:8px;outline:none}.settings-form select.field:focus{border-color:#368ed4}.inline-note{overflow-wrap:anywhere}
+@media(max-width:900px){.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-heading-actions{width:100%}.admin-heading-actions .btn{flex:1}}

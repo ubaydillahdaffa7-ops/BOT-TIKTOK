@@ -1,65 +1,101 @@
-import { getDb } from './store.js';
+import { getDb, logActivity, persist } from './store.js';
 
-const recentCalls = new Map();
-const WINDOW_MS = 60_000;
-const MAX_CALLS_PER_IP_MODEL = 2;
+// Preserve the exact legacy endpoint from the DAFZZ AI v3.0 code the user tested.
+// The current Pollinations API is also configurable through the custom mode.
+const POLLINATIONS_ENDPOINT = 'https://text.pollinations.ai/openai';
+const POLLINATIONS_MODEL = 'openai';
+const SYSTEM_PROMPT = [
+  'Kamu adalah DAFZZ BOT, asisten percakapan yang ramah dan membantu pengguna Indonesia.',
+  'Jawab dalam bahasa Indonesia yang natural, jelas, relevan, dan tidak bertele-tele.',
+  'Jangan gunakan emoji. Jangan mengaku bisa menjalankan fitur yang belum tersedia.',
+  'DAFZZ memiliki 300 tools dalam enam kategori: Foto & Desain, Teks & Data, Dokumen & File, Konverter & Kalkulator, Keamanan & Privasi, Web & Developer.',
+  'Jika pengguna ingin memakai tool DAFZZ, arahkan untuk mengetik .menu atau nama perintah tool.',
+  'Jika pesan tidak jelas, minta penjelasan singkat. Jangan meminta password, cookie, token, atau data rahasia.'
+].join(' ');
 
-function allowAnonymousCall(model, requesterIp) {
-  const key = `${requesterIp || 'unknown'}:${model}`;
-  const now = Date.now();
-  const history = (recentCalls.get(key) || []).filter(time => now - time < WINDOW_MS);
-  if (history.length >= MAX_CALLS_PER_IP_MODEL) return false;
-  history.push(now);
-  recentCalls.set(key, history);
-  return true;
+export function resolveAIConfiguration(settings = {}) {
+  const mode = settings.aiMode === 'custom' ? 'custom' : 'pollinations';
+  if (mode === 'pollinations') {
+    return { mode, endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL, apiKey: '' };
+  }
+  return {
+    mode,
+    endpoint: settings.aiEndpoint || '',
+    model: settings.aiModel || '',
+    apiKey: settings.aiApiKey || ''
+  };
+}
+
+function getFallback(prefix, detail = 'AI sedang tidak tersedia. Coba lagi nanti atau ketik .menu.') {
+  return `${prefix}\n${detail}`;
+}
+
+export function isFallbackAIResponse(answer) {
+  const failureHints = ['AI tidak dapat menjawab saat ini.', 'Layanan AI terlalu lama merespons.', 'Fitur AI sedang dinonaktifkan.', 'Konfigurasi AI belum lengkap.', 'AI sedang tidak tersedia.'];
+  return failureHints.some(hint => String(answer || '').includes(hint));
 }
 
 export async function askFreeAI(userText, context = {}) {
   const settings = getDb().settings;
   const prefix = settings.fallbackPrefix || 'Maaf kamu ngetik apa mpruy';
-  const safeFallback = `${prefix}\nAku belum bisa memahami pesan itu. Ketik .menu untuk melihat perintah DAFZZ yang tersedia.`;
-  if (!settings.aiEnabled) return safeFallback;
+  if (!settings.aiEnabled) return getFallback(prefix, 'Fitur AI sedang dinonaktifkan. Ketik .menu untuk melihat perintah yang tersedia.');
 
-  const endpoint = settings.aiEndpoint || 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions';
-  const model = settings.aiModel || 'Qwen3.6-27B';
-  const ip = context.requesterIp || 'server';
-  if (!allowAnonymousCall(model, ip)) return `${prefix}\nLayanan AI gratis sedang mencapai batas permintaan sementara. Coba lagi sebentar atau ketik .menu.`;
+  const config = resolveAIConfiguration(settings);
+  if (!config.endpoint || !config.model) return getFallback(prefix, 'Konfigurasi AI belum lengkap. Hubungi administrator.');
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (config.apiKey) headers.Authorization = `Bearer ${config.apiKey}`;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 18_000);
+  const timeout = setTimeout(() => controller.abort(), 22_000);
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(config.endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       signal: controller.signal,
       body: JSON.stringify({
-        model,
+        model: config.model,
         messages: [
-          {
-            role: 'system',
-            content: 'Kamu adalah asisten percakapan DAFZZ BOT. Jawab dalam bahasa Indonesia yang natural, santai, sopan, singkat, dan tidak kaku. Jangan gunakan emoji. Jangan mengaku bisa menjalankan fitur yang belum tersedia. DAFZZ memiliki 300 tools dalam 6 kategori: Foto & Desain, Teks & Data, Dokumen & File, Konverter & Kalkulator, Keamanan & Privasi, Web & Developer. Jika pengguna ingin memakai tool, arahkan untuk mengetik .menu atau nama perintah tool. Jika pesan tidak jelas, minta penjelasan singkat. Jangan meminta password, cookie, token, atau data rahasia.'
-          },
-          { role: 'user', content: String(userText).slice(0, 2500) }
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: String(userText).slice(0, 4000) }
         ],
         temperature: 0.6,
-        max_tokens: 180,
+        max_tokens: 420,
         stream: false
       })
     });
-    if (!response.ok) throw new Error(`AI endpoint HTTP ${response.status}`);
-    const payload = await response.json();
-    const answer = payload?.choices?.[0]?.message?.content?.trim();
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(`AI endpoint HTTP ${response.status}${errorText ? `: ${errorText.slice(0, 160)}` : ''}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    let answer = '';
+    if (contentType.includes('application/json')) {
+      const payload = await response.json();
+      const content = payload?.choices?.[0]?.message?.content ?? payload?.output_text ?? payload?.text ?? '';
+      answer = Array.isArray(content)
+        ? content.map(part => typeof part === 'string' ? part : part?.text || '').join('\n')
+        : String(content || '');
+    } else {
+      answer = await response.text();
+    }
+    answer = answer.trim();
     if (!answer) throw new Error('AI tidak mengirim jawaban teks');
-    return `${prefix}\n${answer.slice(0, 3000)}`;
+    return `${prefix}\n${answer.slice(0, 3400)}`;
   } catch (error) {
-    console.warn('[free-ai]', error?.message || error);
-    if (error?.name === 'AbortError') return `${prefix}\nLayanan AI terlalu lama merespons. Coba lagi nanti atau ketik .menu.`;
-    return safeFallback;
+    console.warn('[ai-fallback]', error?.message || error);
+    logActivity('ai_error', error?.name === 'AbortError' ? 'AI terlalu lama merespons' : 'Layanan AI gagal memberikan jawaban');
+    await persist().catch(() => {});
+    if (error?.name === 'AbortError') return getFallback(prefix, 'Layanan AI terlalu lama merespons. Coba lagi nanti atau ketik .menu.');
+    return getFallback(prefix, 'AI tidak dapat menjawab saat ini. Coba lagi nanti atau ketik .menu.');
   } finally {
     clearTimeout(timeout);
   }
 }
 
 export async function testFreeAI() {
-  return askFreeAI('Balas tepat: Koneksi AI DAFZZ aktif.', { requesterIp: 'tiktok-bridge' });
+  const answer = await askFreeAI('Balas tepat: Koneksi AI DAFZZ aktif.', { requesterIp: 'admin-test' });
+  const ok = Boolean(answer) && !isFallbackAIResponse(answer);
+  return { ok, answer, configuration: resolveAIConfiguration(getDb().settings) };
 }

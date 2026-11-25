@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { getDb, persist, randomToken, pruneExpired } from './store.js';
-import { askFreeAI } from './ai.js';
+import { getDb, logActivity, persist, randomToken, pruneExpired } from './store.js';
+import { askFreeAI, isFallbackAIResponse } from './ai.js';
 
 const tools = JSON.parse(await fs.readFile(path.resolve('tools.json'), 'utf8'));
 const CATEGORIES = [
@@ -171,7 +171,13 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
   if (msg.eventName && !msg.eventName.includes('message.received')) return { ignored: 'not_incoming_message' };
 
   const db = getDb();
+  if (db.settings.botEnabled === false) {
+    db.processedEvents[msg.eventId || crypto.createHash('sha256').update(JSON.stringify(event)).digest('hex')] = { status: 'done', createdAt: Date.now(), ignored: 'bot-disabled' };
+    await persist();
+    return { ignored: 'bot_disabled' };
+  }
   db.stats.received += 1;
+  logActivity('message_received', 'Pesan DM TikTok baru diterima');
   const id = msg.eventId || crypto.createHash('sha256').update(JSON.stringify(event)).digest('hex');
   const sessionKey = sessionLookupKey(msg);
   const rawText = msg.text.trim();
@@ -182,8 +188,9 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
         'File dari DM TikTok belum dapat dibaca oleh konektor ini. Ketik perintah tool terlebih dahulu, lalu unggah file melalui halaman DAFZZ yang dikirim bot.',
         `${id}:media-notice`);
       db.stats.replied += 1;
-      await persist();
+      logActivity('bot_reply', 'Pemberitahuan jenis file DM dikirim');
     }
+    await persist();
     return { ignored: 'empty_or_media' };
   }
 
@@ -191,6 +198,7 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
   if (command === '.menu' || command === '.start') {
     await sendTikTokText(msg.conversationId, menuText(), `${id}:menu`);
     db.stats.replied += 1;
+    logActivity('bot_reply', 'Menu utama dikirim ke DM');
     await persist();
     return { replied: true, type: 'menu' };
   }
@@ -206,6 +214,7 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
     ].join('\n');
     await sendTikTokText(msg.conversationId, text, `${id}:help`);
     db.stats.replied += 1;
+    logActivity('bot_reply', 'Panduan bot dikirim ke DM');
     await persist();
     return { replied: true, type: 'help' };
   }
@@ -215,12 +224,14 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
     }
     await sendTikTokText(msg.conversationId, 'Sesi tool sebelumnya dibatalkan. Ketik .menu untuk mulai kembali.', `${id}:cancel`);
     db.stats.replied += 1;
+    logActivity('bot_reply', 'Sesi tool dibatalkan');
     await persist();
     return { replied: true, type: 'cancel' };
   }
   if (command === '.info') {
     await sendTikTokText(msg.conversationId, 'DAFZZ BOT\nKatalog: 300 tools\nKategori: 6\nSetiap kategori: 50 tools\nKetik .menu untuk melihat daftar.', `${id}:info`);
     db.stats.replied += 1;
+    logActivity('bot_reply', 'Informasi bot dikirim ke DM');
     await persist();
     return { replied: true, type: 'info' };
   }
@@ -229,6 +240,7 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
   if (category) {
     await sendTikTokText(msg.conversationId, categoryText(category[0]), `${id}:category:${category[0]}`);
     db.stats.replied += 1;
+    logActivity('bot_reply', `Daftar kategori ${category[0]} dikirim ke DM`);
     await persist();
     return { replied: true, type: 'category' };
   }
@@ -237,6 +249,7 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
   if (tool) {
     await startToolSession(msg, tool, id, requestOrigin);
     db.stats.replied += 1;
+    logActivity('tool_link', `Tautan sesi tool ${tool.slug} dibuat`);
     await persist();
     return { replied: true, type: 'tool', slug: tool.slug };
   }
@@ -244,6 +257,12 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
   const answer = await askFreeAI(rawText, { requesterIp: 'tiktok-bridge' });
   await sendTikTokText(msg.conversationId, answer, `${id}:ai-fallback`);
   db.stats.replied += 1;
+  if (isFallbackAIResponse(answer)) {
+    logActivity('ai_error', 'Pesan fallback dikirim karena AI tidak tersedia');
+  } else {
+    db.stats.aiReplies = (db.stats.aiReplies || 0) + 1;
+    logActivity('ai_reply', 'AI fallback memberikan balasan ke DM');
+  }
   await persist();
   return { replied: true, type: 'ai-fallback' };
 }

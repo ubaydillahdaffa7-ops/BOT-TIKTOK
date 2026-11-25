@@ -153,3 +153,7 @@ body.modal-open{overflow:hidden}
 
 /* Keep the card's launch marker clear of the top-right info control */
 .tool-card:after{position:absolute;right:17px;bottom:17px;grid-column:auto;grid-row:auto}
+
+.menu-nav-link,.bot-nav-link{color:#a9c9e5!important;font-size:11px!important;white-space:nowrap}.bot-nav-link{border-color:#3474a5!important;background:linear-gradient(110deg,#102b46,#0c1d30);box-shadow:inset 0 0 14px #168bff0a}.bot-nav-link:hover{border-color:#5bb5fa!important;box-shadow:0 0 18px #168bff20}
+@media(max-width:650px){.topbar{gap:7px}nav{gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav .config-nav-link{font-size:8px!important;padding:7px 6px;letter-spacing:0}.icon-btn{flex:none}}
+@media(max-width:390px){.topbar{padding-left:10px;padding-right:10px}.brand-name{font-size:11px}.brand{gap:6px}nav .config-nav-link{font-size:7px!important;padding:6px 5px}.icon-btn{width:30px;height:30px}}

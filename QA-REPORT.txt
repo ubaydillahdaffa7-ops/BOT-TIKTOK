@@ -24,13 +24,15 @@ FITUR BOT DAN WEBSITE YANG DITAMBAHKAN
   TikTok aktif agar hasil tetap dapat dikirim sebagai tautan.
 - Panel admin dengan password hash scrypt, session cookie, CSRF token, token
   setup sekali pakai, pembatasan percobaan login, dan tampilan mengikuti warna DAFZZ.
-- AI fallback anonim tanpa API key dan balasan cadangan bila layanan gagal;
-  kuota anonim eksternal membatasi pemakaian.
+- AI fallback bawaan Pollinations pada endpoint legacy OpenAI-compatible yang dipakai website DAFZZ AI v3.0; balasan cadangan saat layanan gagal.
+- Mode AI manual untuk endpoint HTTPS OpenAI-compatible dan API key tersimpan di server.
+- Dashboard Menu Bot TT dengan kontrol ON/OFF, statistik, status bridge/webhook, status penyimpanan, AI, dan 120 log aktivitas terbaru.
 - Docker Compose untuk app, bridge, volume persisten, dan profil Caddy HTTPS.
 
 PENGUJIAN YANG DILAKUKAN PADA PAKET BUILD
 ----------------------------------------
 - Pemeriksaan sintaks JavaScript melalui node --check.
+- Uji konfigurasi Pollinations otomatis dan mode AI manual melalui unit test.
 - Uji unit katalog: total, jumlah per kategori, slug unik, dan data wajib.
 - Uji helper tanda tangan webhook: signature benar, body berubah, timestamp
   kedaluwarsa, dan secret kosong.
@@ -44,6 +46,9 @@ BELUM DIUJI
 - Belum diuji proses browser end-to-end pada perangkat Android dan desktop.
 - Dependensi npm dan image Docker perlu diunduh saat proses instalasi; runtime
   server tidak dijalankan di lingkungan pembuatan ZIP ini.
+- Uji panggilan langsung Pollinations dari lingkungan build tidak dapat dilakukan
+  karena DNS jaringan eksternal tidak tersedia; tombol Uji koneksi AI tersedia
+  di panel admin setelah aplikasi dijalankan di server.
 - Seluruh 300 tool belum diklik dan diuji satu per satu setelah integrasi bot.
 
 BATASAN YANG SUDAH DIKETAHUI DARI WEBSITE SUMBER
@@ -72,7 +77,7 @@ STATUS
 ------
 Build berisi website sumber, katalog 300 tools, backend bot, panel admin,
 halaman hasil dan download, serta installer untuk bridge eksternal. Build ini
-sudah melewati pemeriksaan statis dan unit test yang tercantum di atas. Build
+sudah melewati pemeriksaan sintaks dan unit test yang tercantum di atas. Build
 belum bisa dinyatakan bebas bug atau siap produksi sebelum dipasang, sesi akun
 TikTok diimpor, dan pengujian live dilakukan.
 
