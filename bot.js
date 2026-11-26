@@ -3,9 +3,11 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { getDb, logActivity, persist, randomToken, pruneExpired } from './store.js';
 import { askFreeAI, isFallbackAIResponse } from './ai.js';
+import { handleBotCommand } from './bot-commands.js';
 
 const tools = JSON.parse(await fs.readFile(path.resolve('tools.json'), 'utf8'));
 const CATEGORIES = [
+  ['ai-bot', 'AI & Bot Commands'],
   ['foto', 'Foto & Desain'],
   ['teks', 'Teks & Data'],
   ['file', 'Dokumen & File'],
@@ -53,10 +55,13 @@ export function sendTikTokText(conversationId, text, idempotencyKey) {
 function menuText() {
   return [
     'DAFZZ BOT',
-    '300 TOOLS - 6 KATEGORI',
+    '401 ENTRI - 7 KATEGORI',
     '',
-    ...CATEGORIES.map(([slug, name]) => `${name} - 50 tools\nKetik .${slug}`),
+    ...CATEGORIES.map(([slug, name]) => { const count = tools.filter(tool => tool.category === slug).length; return `${name} - ${count} entri\nKetik .${slug}`; }),
     '',
+    'Kategori AI & Bot Commands berisi Chat AI unggulan, 50 AI/Local Tools, dan 50 perintah TikTok.',
+    'AI/Local Tools juga dapat dipanggil di DM: ketik .ai-story teks atau .sentence-counter teks.',
+    'Ketik .commands untuk melihat 50 perintah tambahan.',
     'Pilih kategori atau langsung ketik perintah tool.',
     'Contoh: .potong-gambar',
     'Ketik .help untuk bantuan.'
@@ -65,8 +70,9 @@ function menuText() {
 
 function categoryText(categorySlug) {
   const group = tools.filter(tool => tool.category === categorySlug);
+  if (categorySlug === 'ai-bot') return ['AI & BOT COMMANDS - 101 ENTRI', '', 'CHAT AI - .ai untuk bertanya langsung di DM', '50 AI & LOCAL TOOLS - tersedia di website dan DM dengan format .slug teks', 'Contoh: .ai-story ide cerita atau .sentence-counter teks', '50 BOT COMMANDS - ketik .commands untuk daftar lengkap', '', 'Catatan: .pin menghasilkan tautan pencarian, bukan lampiran foto. .s dan .toimg menunggu dukungan media dari Bridge.'].join('\n');
   const name = CATEGORIES.find(([slug]) => slug === categorySlug)?.[1] || categorySlug;
-  const lines = group.map(tool => `.${tool.slug} - ${tool.name}`);
+  const lines = group.filter(tool => tool.group !== 'bot-command' && tool.group !== 'featured').map(tool => `.${tool.slug} - ${tool.name}`);
   return [`${name.toUpperCase()} - ${group.length} TOOLS`, '', ...lines, '', 'Ketik perintah tool yang dipilih.'].join('\n').slice(0, 3900);
 }
 
@@ -74,7 +80,7 @@ function findTool(message) {
   const command = String(message).trim().toLowerCase().split(/\s+/)[0];
   if (!command.startsWith('.')) return null;
   const slug = command.slice(1);
-  return tools.find(tool => tool.slug === slug) || null;
+  return tools.find(tool => tool.slug === slug && tool.group !== 'bot-command' && tool.group !== 'featured') || null;
 }
 
 function normalizedMessage(event) {
@@ -205,7 +211,9 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
   if (command === '.help') {
     const text = [
       'PANDUAN DAFZZ BOT',
-      '.menu - tampilkan enam kategori',
+      '.menu - tampilkan tujuh kategori',
+      '.ai-bot - ringkasan kategori AI & Bot Commands',
+      '.commands - tampilkan 50 perintah bot baru',
       '.foto / .teks / .file / .konverter / .keamanan / .web - tampilkan daftar tools',
       '.cancel - batalkan sesi sebelumnya',
       '.info - informasi bot',
@@ -229,11 +237,21 @@ export async function handleTikTokEvent(event, requestOrigin = '') {
     return { replied: true, type: 'cancel' };
   }
   if (command === '.info') {
-    await sendTikTokText(msg.conversationId, 'DAFZZ BOT\nKatalog: 300 tools\nKategori: 6\nSetiap kategori: 50 tools\nKetik .menu untuk melihat daftar.', `${id}:info`);
+    await sendTikTokText(msg.conversationId, 'DAFZZ BOT\nKatalog: 401 entri\nKategori: 7\nKategori AI & Bot Commands: Chat AI + 50 AI/Local Tools + 50 Bot Commands\nEnam kategori lama: masing-masing 50 tools\nKetik .menu untuk melihat daftar.', `${id}:info`);
     db.stats.replied += 1;
     logActivity('bot_reply', 'Informasi bot dikirim ke DM');
     await persist();
     return { replied: true, type: 'info' };
+  }
+
+  const customCommand = await handleBotCommand(rawText);
+  if (customCommand) {
+    await sendTikTokText(msg.conversationId, customCommand.reply, `${id}:custom:${customCommand.command}`);
+    db.stats.replied += 1;
+    if (customCommand.type === 'ai' && !isFallbackAIResponse(customCommand.reply)) db.stats.aiReplies = (db.stats.aiReplies || 0) + 1;
+    logActivity(customCommand.type === 'ai' ? (isFallbackAIResponse(customCommand.reply) ? 'ai_error' : 'ai_reply') : 'bot_reply', `Perintah ${customCommand.command} diproses`);
+    await persist();
+    return { replied: true, type: 'bot-command', command: customCommand.command };
   }
 
   const category = CATEGORIES.find(([slug]) => command === `.${slug}`);

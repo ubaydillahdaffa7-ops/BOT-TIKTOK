@@ -7,7 +7,7 @@ import multer from 'multer';
 import { DATA_DIR, getDb, getSessionSecret, initStore, logActivity, makePasswordRecord, persist, pruneExpired, randomToken, verifyPassword } from './store.js';
 import { verifyTikTokBridgeSignature, safeFileName, isValidHttpUrl } from './security.js';
 import { handleTikTokEvent, getCatalogStats, findCatalogTool, sendTikTokText } from './bot.js';
-import { testFreeAI } from './ai.js';
+import { testFreeAI, askFreeAI, isFallbackAIResponse } from './ai.js';
 
 const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_DIR = path.resolve('.');
@@ -108,6 +108,26 @@ app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 
 app.get('/healthz', (_req, res) => res.json({ ok: true, app: 'DAFZZ TikTok Bot', tools: getCatalogStats().total }));
 app.get('/api/catalog', (_req, res) => res.json(getCatalogStats()));
+
+// Public Chat AI endpoint: API credentials remain on the server and requests are rate limited.
+const publicAiRequests = new Map();
+app.post('/api/ai/ask', async (req, res) => {
+  const ip = String(req.ip || req.socket?.remoteAddress || 'unknown').slice(0, 100);
+  const now = Date.now();
+  const recent = (publicAiRequests.get(ip) || []).filter(time => now - time < 60_000);
+  if (recent.length >= 10) return sendError(res, 429, 'Batas Chat AI tercapai. Coba lagi sekitar satu menit.');
+  recent.push(now);
+  publicAiRequests.set(ip, recent);
+  if (publicAiRequests.size > 2000) {
+    for (const [key, times] of publicAiRequests) if (!times.some(time => now - time < 60_000)) publicAiRequests.delete(key);
+  }
+  const message = String(req.body?.message || '').trim();
+  if (!message) return sendError(res, 400, 'Masukkan pertanyaan atau teks terlebih dahulu.');
+  if (message.length > 7000) return sendError(res, 413, 'Teks terlalu panjang. Batas 7.000 karakter.');
+  const answer = await askFreeAI(message, { includePrefix: false, requesterIp: ip });
+  if (isFallbackAIResponse(answer)) return res.status(503).json({ ok: false, error: answer });
+  return res.json({ ok: true, answer });
+});
 
 app.get('/api/admin/state', (req, res) => {
   if (!req.session.csrfToken) req.session.csrfToken = randomToken(24);

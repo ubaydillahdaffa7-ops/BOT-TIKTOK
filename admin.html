@@ -11,7 +11,11 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/">ᙃᴀ̷𝖿ᴢᴢ<span>--Tools</span></a>
-    <nav><a href="/" class="nav-link">Menu Tools</a><a href="/bot" class="nav-link">Menu Bot TT</a></nav>
+    <nav aria-label="Navigasi utama">
+      <a class="config-nav-link menu-nav-link" href="/" aria-label="Tools" title="Tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 17.5 9.5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13 8 3 3"/></svg><span>Tools</span></a>
+      <a class="config-nav-link bot-nav-link" href="/bot" aria-label="Bot TT" title="Bot TT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>Bot TT</span></a>
+      <a class="config-nav-link advanced-nav-link" href="/admin" aria-label="Lanjutan" title="Lanjutan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Lanjutan</span></a>
+    </nav>
     <span class="admin-mark">BOT CONTROL</span>
   </header>
   <main class="container admin-container">
@@ -44,7 +48,7 @@
       </div>
 
       <div class="metric-grid" id="metrics">
-        <article class="metric-card"><span class="metric-label">TOTAL TOOLS</span><strong id="metricTools">300</strong><small>6 kategori</small></article>
+        <article class="metric-card"><span class="metric-label">TOTAL TOOLS</span><strong id="metricTools">401</strong><small>7 kategori</small></article>
         <article class="metric-card"><span class="metric-label">DM DITERIMA</span><strong id="metricReceived">0</strong><small>Pesan masuk</small></article>
         <article class="metric-card"><span class="metric-label">BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons terkirim ke bridge</small></article>
         <article class="metric-card"><span class="metric-label">BALASAN AI</span><strong id="metricAiReplies">0</strong><small>Jawaban fallback AI</small></article>
@@ -130,7 +134,7 @@
       </section>
 
       <section class="admin-section">
-        <div class="section-title"><div><p class="eyebrow">KATALOG SUMBER</p><h2>Enam kategori DAFZZ</h2></div><span class="muted">300 tools</span></div>
+        <div class="section-title"><div><p class="eyebrow">KATALOG SUMBER</p><h2>Tujuh kategori DAFZZ</h2></div><span class="muted">401 entri</span></div>
         <div id="categoryRows" class="category-rows"></div>
       </section>
 

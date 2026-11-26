@@ -2098,5 +2098,1016 @@
     "description": "Checklist audit website",
     "category": "web",
     "icon": "globe"
+  },
+  {
+    "slug": "chat-ai",
+    "name": "DAFZZ Chat AI",
+    "description": "Chat AI unggulan untuk bertanya dan berdiskusi dengan AI bawaan DAFZZ.",
+    "category": "ai-bot",
+    "icon": "brain-circuit",
+    "group": "featured",
+    "engine": "ai",
+    "featured": true,
+    "command": ".ai"
+  },
+  {
+    "slug": "ai-story",
+    "name": "AI Cerita",
+    "description": "Membuat cerita pendek berdasarkan ide dan genre.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-story"
+  },
+  {
+    "slug": "ai-novel-outline",
+    "name": "AI Kerangka Novel",
+    "description": "Menyusun premis, karakter, konflik, dan bab novel.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-novel-outline"
+  },
+  {
+    "slug": "ai-poem",
+    "name": "AI Puisi",
+    "description": "Membuat puisi orisinal berdasarkan tema.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-poem"
+  },
+  {
+    "slug": "ai-pantun",
+    "name": "AI Pantun",
+    "description": "Membuat pantun dengan rima yang sesuai.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-pantun"
+  },
+  {
+    "slug": "ai-caption",
+    "name": "AI Caption",
+    "description": "Membuat caption media sosial dalam beberapa gaya.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-caption"
+  },
+  {
+    "slug": "ai-article",
+    "name": "AI Artikel",
+    "description": "Menyusun artikel dengan judul dan subbagian.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-article"
+  },
+  {
+    "slug": "ai-summary",
+    "name": "AI Ringkas Teks",
+    "description": "Merangkum teks tanpa menghilangkan inti.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-summary"
+  },
+  {
+    "slug": "ai-paraphrase",
+    "name": "AI Parafrase",
+    "description": "Menulis ulang teks dengan makna tetap.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-paraphrase"
+  },
+  {
+    "slug": "ai-translate",
+    "name": "AI Penerjemah",
+    "description": "Menerjemahkan teks ke bahasa tujuan.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-translate"
+  },
+  {
+    "slug": "ai-explain",
+    "name": "AI Penjelas Materi",
+    "description": "Menjelaskan topik dengan bahasa sederhana.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-explain"
+  },
+  {
+    "slug": "ai-code-helper",
+    "name": "AI Asisten Kode",
+    "description": "Membantu membuat dan menjelaskan kode.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-code-helper"
+  },
+  {
+    "slug": "ai-ideas",
+    "name": "AI Pembuat Ide",
+    "description": "Menghasilkan ide kreatif dari sebuah topik.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-ideas"
+  },
+  {
+    "slug": "ai-product-copy",
+    "name": "AI Deskripsi Produk",
+    "description": "Menyusun deskripsi produk yang informatif.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-product-copy"
+  },
+  {
+    "slug": "ai-bio",
+    "name": "AI Bio Profil",
+    "description": "Membuat pilihan bio profil singkat.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-bio"
+  },
+  {
+    "slug": "ai-email",
+    "name": "AI Draf Email",
+    "description": "Membantu menulis email yang jelas dan sopan.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-email"
+  },
+  {
+    "slug": "ai-video-script",
+    "name": "AI Naskah Video",
+    "description": "Menyusun naskah video dengan pembuka dan penutup.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-video-script"
+  },
+  {
+    "slug": "ai-hashtags",
+    "name": "AI Hashtag",
+    "description": "Menyarankan hashtag sesuai topik.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-hashtags"
+  },
+  {
+    "slug": "ai-title",
+    "name": "AI Pembuat Judul",
+    "description": "Menghasilkan beberapa alternatif judul.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-title"
+  },
+  {
+    "slug": "ai-dialogue",
+    "name": "AI Dialog",
+    "description": "Menyusun dialog antar karakter.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-dialogue"
+  },
+  {
+    "slug": "ai-study-notes",
+    "name": "AI Catatan Belajar",
+    "description": "Mengubah materi menjadi catatan terstruktur.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-study-notes"
+  },
+  {
+    "slug": "ai-mindmap",
+    "name": "AI Peta Pikiran",
+    "description": "Membuat peta pikiran dalam format teks.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-mindmap"
+  },
+  {
+    "slug": "ai-question-maker",
+    "name": "AI Pembuat Soal",
+    "description": "Membuat soal latihan dan kunci jawaban.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-question-maker"
+  },
+  {
+    "slug": "ai-ad-copy",
+    "name": "AI Teks Iklan",
+    "description": "Menulis iklan yang jelas dan tidak menyesatkan.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-ad-copy"
+  },
+  {
+    "slug": "ai-lesson-plan",
+    "name": "AI Rencana Belajar",
+    "description": "Menyusun rencana belajar bertahap.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-lesson-plan"
+  },
+  {
+    "slug": "ai-character-profile",
+    "name": "AI Profil Karakter",
+    "description": "Membuat profil karakter fiksi yang detail.",
+    "category": "ai-bot",
+    "icon": "sparkles",
+    "group": "ai-local",
+    "engine": "ai",
+    "command": ".ai-character-profile"
+  },
+  {
+    "slug": "sentence-counter",
+    "name": "Penghitung Kalimat",
+    "description": "Menghitung jumlah kalimat.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".sentence-counter"
+  },
+  {
+    "slug": "paragraph-counter",
+    "name": "Penghitung Paragraf",
+    "description": "Menghitung paragraf berdasarkan pemisah baris.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".paragraph-counter"
+  },
+  {
+    "slug": "reading-time",
+    "name": "Estimasi Waktu Baca",
+    "description": "Memperkirakan waktu membaca berdasarkan jumlah kata.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".reading-time"
+  },
+  {
+    "slug": "character-frequency",
+    "name": "Frekuensi Karakter",
+    "description": "Menghitung frekuensi setiap karakter.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".character-frequency"
+  },
+  {
+    "slug": "remove-diacritics",
+    "name": "Hapus Aksen Huruf",
+    "description": "Menghapus tanda aksen Unicode pada huruf.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".remove-diacritics"
+  },
+  {
+    "slug": "unicode-normalizer",
+    "name": "Normalisasi Unicode",
+    "description": "Menormalkan teks ke NFC atau NFKC.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".unicode-normalizer"
+  },
+  {
+    "slug": "smart-quotes",
+    "name": "Tanda Kutip Pintar",
+    "description": "Mengubah tanda kutip lurus menjadi kutip tipografis.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".smart-quotes"
+  },
+  {
+    "slug": "strip-control-chars",
+    "name": "Pembersih Karakter Kontrol",
+    "description": "Menghapus karakter kontrol yang tidak terlihat.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".strip-control-chars"
+  },
+  {
+    "slug": "extract-hashtags",
+    "name": "Ekstrak Hashtag",
+    "description": "Mengambil hashtag dari teks.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".extract-hashtags"
+  },
+  {
+    "slug": "extract-mentions",
+    "name": "Ekstrak Mention",
+    "description": "Mengambil mention akun dari teks.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".extract-mentions"
+  },
+  {
+    "slug": "extract-phone",
+    "name": "Ekstrak Nomor Telepon",
+    "description": "Mengambil pola nomor telepon Indonesia.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".extract-phone"
+  },
+  {
+    "slug": "extract-numbers",
+    "name": "Ekstrak Angka",
+    "description": "Mengambil semua angka dari teks.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".extract-numbers"
+  },
+  {
+    "slug": "extract-dates",
+    "name": "Ekstrak Tanggal",
+    "description": "Mengambil pola tanggal umum dari teks.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".extract-dates"
+  },
+  {
+    "slug": "initials-generator",
+    "name": "Pembuat Inisial",
+    "description": "Membuat inisial dari nama atau frasa.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".initials-generator"
+  },
+  {
+    "slug": "text-wrap",
+    "name": "Pembungkus Baris",
+    "description": "Membungkus teks berdasarkan lebar karakter.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".text-wrap"
+  },
+  {
+    "slug": "text-prefixer",
+    "name": "Tambah Awalan Baris",
+    "description": "Menambahkan awalan pada setiap baris.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".text-prefixer"
+  },
+  {
+    "slug": "text-suffixer",
+    "name": "Tambah Akhiran Baris",
+    "description": "Menambahkan akhiran pada setiap baris.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".text-suffixer"
+  },
+  {
+    "slug": "list-numberer",
+    "name": "Penomoran Daftar",
+    "description": "Memberi nomor pada setiap baris.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".list-numberer"
+  },
+  {
+    "slug": "list-bulletizer",
+    "name": "Pembuat Bullet List",
+    "description": "Mengubah baris menjadi daftar bullet.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".list-bulletizer"
+  },
+  {
+    "slug": "random-choice",
+    "name": "Pemilih Acak",
+    "description": "Memilih satu baris atau opsi secara acak.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".random-choice"
+  },
+  {
+    "slug": "text-repeater",
+    "name": "Pengulang Teks",
+    "description": "Mengulang teks sesuai jumlah yang ditentukan.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".text-repeater"
+  },
+  {
+    "slug": "template-filler",
+    "name": "Pengisi Template",
+    "description": "Mengganti placeholder {{nama}} berdasarkan pasangan key=value.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".template-filler"
+  },
+  {
+    "slug": "csv-to-markdown-table",
+    "name": "CSV ke Tabel Markdown",
+    "description": "Mengubah CSV menjadi tabel Markdown.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".csv-to-markdown-table"
+  },
+  {
+    "slug": "json-to-typescript",
+    "name": "JSON ke TypeScript",
+    "description": "Membuat deklarasi interface sederhana dari JSON.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".json-to-typescript"
+  },
+  {
+    "slug": "line-numberer",
+    "name": "Penomoran Baris",
+    "description": "Menambahkan nomor pada setiap baris.",
+    "category": "ai-bot",
+    "icon": "wand",
+    "group": "ai-local",
+    "engine": "local",
+    "command": ".line-numberer"
+  },
+  {
+    "slug": "botcmd-pin",
+    "name": ".pin — Mencari gambar melalui tautan pencarian",
+    "description": "Perintah TikTok: .pin Naruto #7. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".pin",
+    "usage": ".pin Naruto #7"
+  },
+  {
+    "slug": "botcmd-s",
+    "name": ".s — Konversi gambar ke stiker; memerlukan dukungan media Bridge",
+    "description": "Perintah TikTok: .s (balas gambar). Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".s",
+    "usage": ".s (balas gambar)"
+  },
+  {
+    "slug": "botcmd-toimg",
+    "name": ".toimg — Konversi stiker ke gambar; memerlukan dukungan media Bridge",
+    "description": "Perintah TikTok: .toimg (balas stiker). Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".toimg",
+    "usage": ".toimg (balas stiker)"
+  },
+  {
+    "slug": "botcmd-anime",
+    "name": ".anime — Mencari informasi anime",
+    "description": "Perintah TikTok: .anime Naruto. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".anime",
+    "usage": ".anime Naruto"
+  },
+  {
+    "slug": "botcmd-manga",
+    "name": ".manga — Mencari informasi manga",
+    "description": "Perintah TikTok: .manga One Piece. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".manga",
+    "usage": ".manga One Piece"
+  },
+  {
+    "slug": "botcmd-randomanime",
+    "name": ".randomanime — Rekomendasi anime acak",
+    "description": "Perintah TikTok: .randomanime. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".randomanime",
+    "usage": ".randomanime"
+  },
+  {
+    "slug": "botcmd-randommanga",
+    "name": ".randommanga — Rekomendasi manga acak",
+    "description": "Perintah TikTok: .randommanga. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".randommanga",
+    "usage": ".randommanga"
+  },
+  {
+    "slug": "botcmd-topanime",
+    "name": ".topanime — Melihat daftar anime populer",
+    "description": "Perintah TikTok: .topanime. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".topanime",
+    "usage": ".topanime"
+  },
+  {
+    "slug": "botcmd-character",
+    "name": ".character — Mencari karakter anime",
+    "description": "Perintah TikTok: .character Naruto. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".character",
+    "usage": ".character Naruto"
+  },
+  {
+    "slug": "botcmd-ai",
+    "name": ".ai — Bertanya langsung kepada AI di DM",
+    "description": "Perintah TikTok: .ai pertanyaan. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".ai",
+    "usage": ".ai pertanyaan"
+  },
+  {
+    "slug": "botcmd-pokemon",
+    "name": ".pokemon — Informasi Pokémon berdasarkan nama",
+    "description": "Perintah TikTok: .pokemon pikachu. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".pokemon",
+    "usage": ".pokemon pikachu"
+  },
+  {
+    "slug": "botcmd-randompokemon",
+    "name": ".randompokemon — Memilih Pokémon secara acak",
+    "description": "Perintah TikTok: .randompokemon. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".randompokemon",
+    "usage": ".randompokemon"
+  },
+  {
+    "slug": "botcmd-pokemonmove",
+    "name": ".pokemonmove — Informasi jurus Pokémon",
+    "description": "Perintah TikTok: .pokemonmove thunderbolt. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".pokemonmove",
+    "usage": ".pokemonmove thunderbolt"
+  },
+  {
+    "slug": "botcmd-github",
+    "name": ".github — Mencari profil GitHub",
+    "description": "Perintah TikTok: .github octocat. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".github",
+    "usage": ".github octocat"
+  },
+  {
+    "slug": "botcmd-repo",
+    "name": ".repo — Informasi repositori GitHub",
+    "description": "Perintah TikTok: .repo owner/nama-repo. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".repo",
+    "usage": ".repo owner/nama-repo"
+  },
+  {
+    "slug": "botcmd-npm",
+    "name": ".npm — Informasi paket npm",
+    "description": "Perintah TikTok: .npm express. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".npm",
+    "usage": ".npm express"
+  },
+  {
+    "slug": "botcmd-book",
+    "name": ".book — Mencari buku melalui Open Library",
+    "description": "Perintah TikTok: .book harry potter. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".book",
+    "usage": ".book harry potter"
+  },
+  {
+    "slug": "botcmd-author",
+    "name": ".author — Mencari penulis melalui Open Library",
+    "description": "Perintah TikTok: .author Andrea Hirata. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".author",
+    "usage": ".author Andrea Hirata"
+  },
+  {
+    "slug": "botcmd-country",
+    "name": ".country — Informasi negara",
+    "description": "Perintah TikTok: .country Indonesia. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".country",
+    "usage": ".country Indonesia"
+  },
+  {
+    "slug": "botcmd-university",
+    "name": ".university — Mencari universitas berdasarkan negara",
+    "description": "Perintah TikTok: .university Indonesia. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".university",
+    "usage": ".university Indonesia"
+  },
+  {
+    "slug": "botcmd-weather",
+    "name": ".weather — Cuaca saat ini melalui layanan publik",
+    "description": "Perintah TikTok: .weather Banyuwangi. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".weather",
+    "usage": ".weather Banyuwangi"
+  },
+  {
+    "slug": "botcmd-earthquake",
+    "name": ".earthquake — Informasi gempa terkini BMKG",
+    "description": "Perintah TikTok: .earthquake. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".earthquake",
+    "usage": ".earthquake"
+  },
+  {
+    "slug": "botcmd-iss",
+    "name": ".iss — Posisi Stasiun Luar Angkasa Internasional",
+    "description": "Perintah TikTok: .iss. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".iss",
+    "usage": ".iss"
+  },
+  {
+    "slug": "botcmd-wiki",
+    "name": ".wiki — Ringkasan halaman Wikipedia",
+    "description": "Perintah TikTok: .wiki Naruto. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".wiki",
+    "usage": ".wiki Naruto"
+  },
+  {
+    "slug": "botcmd-news",
+    "name": ".news — Mencari berita berdasarkan topik",
+    "description": "Perintah TikTok: .news teknologi. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".news",
+    "usage": ".news teknologi"
+  },
+  {
+    "slug": "botcmd-search",
+    "name": ".search — Membuat tautan pencarian web",
+    "description": "Perintah TikTok: .search topik. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".search",
+    "usage": ".search topik"
+  },
+  {
+    "slug": "botcmd-yt",
+    "name": ".yt — Mencari video di YouTube",
+    "description": "Perintah TikTok: .yt tutorial JavaScript. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".yt",
+    "usage": ".yt tutorial JavaScript"
+  },
+  {
+    "slug": "botcmd-reddit",
+    "name": ".reddit — Mencari diskusi di Reddit",
+    "description": "Perintah TikTok: .reddit Android. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".reddit",
+    "usage": ".reddit Android"
+  },
+  {
+    "slug": "botcmd-stack",
+    "name": ".stack — Mencari jawaban di Stack Overflow",
+    "description": "Perintah TikTok: .stack JavaScript fetch. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".stack",
+    "usage": ".stack JavaScript fetch"
+  },
+  {
+    "slug": "botcmd-docs",
+    "name": ".docs — Mencari dokumentasi pemrograman",
+    "description": "Perintah TikTok: .docs CSS grid. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".docs",
+    "usage": ".docs CSS grid"
+  },
+  {
+    "slug": "botcmd-joke",
+    "name": ".joke — Mengambil lelucon acak",
+    "description": "Perintah TikTok: .joke. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".joke",
+    "usage": ".joke"
+  },
+  {
+    "slug": "botcmd-dadjoke",
+    "name": ".dadjoke — Mengambil dad joke",
+    "description": "Perintah TikTok: .dadjoke. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".dadjoke",
+    "usage": ".dadjoke"
+  },
+  {
+    "slug": "botcmd-quote",
+    "name": ".quote — Kutipan singkat berbahasa Indonesia",
+    "description": "Perintah TikTok: .quote. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".quote",
+    "usage": ".quote"
+  },
+  {
+    "slug": "botcmd-fact",
+    "name": ".fact — Fakta pengetahuan acak",
+    "description": "Perintah TikTok: .fact. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".fact",
+    "usage": ".fact"
+  },
+  {
+    "slug": "botcmd-trivia",
+    "name": ".trivia — Pertanyaan trivia acak",
+    "description": "Perintah TikTok: .trivia. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".trivia",
+    "usage": ".trivia"
+  },
+  {
+    "slug": "botcmd-riddle",
+    "name": ".riddle — Teka-teki acak",
+    "description": "Perintah TikTok: .riddle. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".riddle",
+    "usage": ".riddle"
+  },
+  {
+    "slug": "botcmd-eightball",
+    "name": ".eightball — Jawaban acak ala Magic 8 Ball",
+    "description": "Perintah TikTok: .eightball pertanyaan. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".eightball",
+    "usage": ".eightball pertanyaan"
+  },
+  {
+    "slug": "botcmd-coinflip",
+    "name": ".coinflip — Permainan lempar koin",
+    "description": "Perintah TikTok: .coinflip. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".coinflip",
+    "usage": ".coinflip"
+  },
+  {
+    "slug": "botcmd-dice",
+    "name": ".dice — Lempar dadu",
+    "description": "Perintah TikTok: .dice 2. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".dice",
+    "usage": ".dice 2"
+  },
+  {
+    "slug": "botcmd-choose",
+    "name": ".choose — Memilih satu opsi secara acak",
+    "description": "Perintah TikTok: .choose merah | biru | hijau. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".choose",
+    "usage": ".choose merah | biru | hijau"
+  },
+  {
+    "slug": "botcmd-rps",
+    "name": ".rps — Permainan batu-gunting-kertas",
+    "description": "Perintah TikTok: .rps batu. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".rps",
+    "usage": ".rps batu"
+  },
+  {
+    "slug": "botcmd-dog",
+    "name": ".dog — Tautan foto anjing acak",
+    "description": "Perintah TikTok: .dog. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".dog",
+    "usage": ".dog"
+  },
+  {
+    "slug": "botcmd-cat",
+    "name": ".cat — Tautan foto kucing acak",
+    "description": "Perintah TikTok: .cat. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".cat",
+    "usage": ".cat"
+  },
+  {
+    "slug": "botcmd-meme",
+    "name": ".meme — Mencari meme berdasarkan topik",
+    "description": "Perintah TikTok: .meme kucing. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".meme",
+    "usage": ".meme kucing"
+  },
+  {
+    "slug": "botcmd-server",
+    "name": ".server — Informasi runtime server bot",
+    "description": "Perintah TikTok: .server. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".server",
+    "usage": ".server"
+  },
+  {
+    "slug": "botcmd-botstatus",
+    "name": ".botstatus — Status bot dan statistik ringkas",
+    "description": "Perintah TikTok: .botstatus. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".botstatus",
+    "usage": ".botstatus"
+  },
+  {
+    "slug": "botcmd-timeid",
+    "name": ".timeid — Waktu Indonesia bagian barat",
+    "description": "Perintah TikTok: .timeid. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".timeid",
+    "usage": ".timeid"
+  },
+  {
+    "slug": "botcmd-dateid",
+    "name": ".dateid — Tanggal Indonesia",
+    "description": "Perintah TikTok: .dateid. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".dateid",
+    "usage": ".dateid"
+  },
+  {
+    "slug": "botcmd-define",
+    "name": ".define — Mencari definisi kata bahasa Inggris",
+    "description": "Perintah TikTok: .define resilient. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".define",
+    "usage": ".define resilient"
+  },
+  {
+    "slug": "botcmd-commands",
+    "name": ".commands — Daftar 50 perintah tambahan",
+    "description": "Perintah TikTok: .commands. Jalankan melalui DM pada percakapan bot.",
+    "category": "ai-bot",
+    "icon": "terminal",
+    "group": "bot-command",
+    "command": ".commands",
+    "usage": ".commands"
   }
 ]

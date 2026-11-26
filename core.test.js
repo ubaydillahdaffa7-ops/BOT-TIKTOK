@@ -4,26 +4,49 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { verifyTikTokBridgeSignature, safeFileName, isValidHttpUrl } from './security.js';
 import { getCatalogStats, findCatalogTool } from './bot.js';
+import { BOT_COMMANDS, AI_LOCAL_BOT_COMMANDS, AI_TOOL_COMMANDS, LOCAL_AI_TOOL_COMMANDS, handleBotCommand } from './bot-commands.js';
 import { askFreeAI, resolveAIConfiguration } from './ai.js';
 import { getDb } from './store.js';
 
 const catalog = JSON.parse(fs.readFileSync(new URL('./tools.json', import.meta.url), 'utf8'));
 
-test('catalog contains exactly 300 tools and six categories of 50', () => {
-  assert.equal(catalog.length, 300);
-  assert.equal(new Set(catalog.map(tool => tool.slug)).size, 300);
+test('catalog preserves 300 original tools and adds category seven with 101 entries', () => {
+  assert.equal(catalog.length, 401);
+  assert.equal(new Set(catalog.map(tool => tool.slug)).size, 401);
+  const original = catalog.slice(0, 300);
   const expected = ['foto', 'teks', 'file', 'konverter', 'keamanan', 'web'];
-  assert.deepEqual([...new Set(catalog.map(tool => tool.category))].sort(), [...expected].sort());
+  assert.deepEqual([...new Set(original.map(tool => tool.category))].sort(), [...expected].sort());
   for (const category of expected) {
-    assert.equal(catalog.filter(tool => tool.category === category).length, 50, `${category} must have 50 tools`);
+    assert.equal(original.filter(tool => tool.category === category).length, 50, `${category} must retain 50 tools`);
   }
+  const added = catalog.slice(300);
+  assert.equal(added.length, 101);
+  assert.equal(added.filter(tool => tool.group === 'featured').length, 1);
+  assert.equal(added.filter(tool => tool.group === 'ai-local').length, 50);
+  assert.equal(added.filter(tool => tool.group === 'ai-local' && tool.engine === 'ai').length, 25);
+  assert.equal(added.filter(tool => tool.group === 'ai-local' && tool.engine === 'local').length, 25);
+  assert.equal(added.filter(tool => tool.group === 'bot-command').length, 50);
+  assert.ok(added.find(tool => tool.slug === 'chat-ai' && tool.command === '.ai'));
+  for (const tool of added.filter(tool => tool.group === 'ai-local')) assert.equal(tool.command, `.${tool.slug}`);
+  assert.deepEqual([...AI_LOCAL_BOT_COMMANDS].sort(), added.filter(tool => tool.group === 'ai-local').map(tool => tool.slug).sort());
+  assert.equal(AI_TOOL_COMMANDS.length, 25);
+  assert.equal(LOCAL_AI_TOOL_COMMANDS.length, 25);
+  const script = fs.readFileSync(new URL('./script.js', import.meta.url), 'utf8');
+  const aiPromptBlock = script.match(/const AI_TOOL_PROMPTS=\{([\s\S]*?)\n\};/)?.[1] || '';
+  const aiPromptSlugs = [...aiPromptBlock.matchAll(/^'([^']+)':/gm)].map(match => match[1]);
+  const localHandlerBlock = script.match(/function runLocalAiTool[\s\S]*?\n\}/)?.[0] || '';
+  const localHandlerSlugs = [...localHandlerBlock.matchAll(/case '([^']+)':/g)].map(match => match[1]);
+  assert.deepEqual(added.filter(tool => tool.group === 'ai-local' && tool.engine === 'ai').map(tool => tool.slug).sort(), aiPromptSlugs.sort());
+  assert.deepEqual(added.filter(tool => tool.group === 'ai-local' && tool.engine === 'local').map(tool => tool.slug).sort(), localHandlerSlugs.sort());
+  assert.ok(added.every(tool => tool.category === 'ai-bot'));
   const stats = getCatalogStats();
-  assert.equal(stats.total, 300);
-  assert.equal(stats.categories.length, 6);
+  assert.equal(stats.total, 401);
+  assert.equal(stats.categories.length, 7);
+  assert.equal(stats.categories[0].slug, 'ai-bot');
 });
 
 test('every catalog entry has a slug, name, description and valid category', () => {
-  const categories = new Set(['foto', 'teks', 'file', 'konverter', 'keamanan', 'web']);
+  const categories = new Set(['ai-bot', 'foto', 'teks', 'file', 'konverter', 'keamanan', 'web']);
   for (const tool of catalog) {
     assert.match(tool.slug, /^[a-z0-9-]+$/);
     assert.ok(tool.name?.trim());
@@ -36,6 +59,74 @@ test('tool lookup resolves known source tools', () => {
   assert.equal(findCatalogTool('potong-gambar')?.name, catalog.find(x => x.slug === 'potong-gambar').name);
   assert.ok(findCatalogTool('word-to-pdf'));
   assert.equal(findCatalogTool('not-a-real-tool'), null);
+});
+
+
+test('50 Bot Commands are unique and new commands work without duplicating old utility tools', async () => {
+  assert.equal(BOT_COMMANDS.length, 50);
+  assert.equal(AI_LOCAL_BOT_COMMANDS.length, 50);
+  assert.equal(new Set(AI_LOCAL_BOT_COMMANDS).size, 50);
+  assert.equal(new Set(BOT_COMMANDS.map(item => item.name)).size, 50);
+  const oldTools = new Set(catalog.slice(0, 300).map(item => item.slug));
+  for (const item of BOT_COMMANDS) assert.ok(!oldTools.has(item.name), `.${item.name} must not duplicate an old tool slug`);
+  for (const duplicate of ['calc', 'password', 'uuid', 'morse', 'qrcode', 'reverse', 'base64', 'hash']) {
+    assert.ok(!BOT_COMMANDS.some(item => item.name === duplicate), `.${duplicate} is already covered by the original tool catalog`);
+  }
+  const choose = await handleBotCommand('.choose merah | biru | hijau');
+  assert.equal(choose.command, 'choose');
+  assert.match(choose.reply, /Pilihan terpilih:/);
+  const previousFetch = globalThis.fetch;
+  let pinUrl = '';
+  globalThis.fetch = async url => {
+    pinUrl = String(url);
+    return new Response(JSON.stringify({ query: { pages: { '42': { title: 'File:Naruto test.png', imageinfo: [{ thumburl: 'https://upload.wikimedia.org/example.png' }] } } } }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  let pin;
+  try { pin = await handleBotCommand('.pin Naruto #77'); }
+  finally { globalThis.fetch = previousFetch; }
+  assert.match(pinUrl, /gsrlimit=10/);
+  assert.match(pin.reply, /maksimal 10/);
+  assert.match(pin.reply, /upload.wikimedia.org\/example.png/);
+  const sticker = await handleBotCommand('.s');
+  assert.match(sticker.reply, /hanya mendukung pesan teks/);
+  assert.equal(await handleBotCommand('.calc 2+2'), null);
+  const count = await handleBotCommand('.sentence-counter Satu. Dua!');
+  assert.match(count.reply, /Jumlah kalimat: 2/);
+  const hashtags = await handleBotCommand('.extract-hashtags #dafzz #tools #dafzz');
+  assert.equal(hashtags.reply, '#dafzz\n#tools');
+  const ts = await handleBotCommand('.json-to-typescript {"name":"DAFZZ","active":true}');
+  assert.match(ts.reply, /name: string;/);
+  assert.match(ts.reply, /active: boolean;/);
+  const oldFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ choices: [{ message: { content: 'Cerita uji DAFZZ.' } }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  try {
+    const aiStory = await handleBotCommand('.ai-story seekor kucing menemukan bintang');
+    assert.equal(aiStory.type, 'ai');
+    assert.equal(aiStory.reply, 'Cerita uji DAFZZ.');
+  } finally { globalThis.fetch = oldFetch; }
+});
+
+test('25 Local Tools kategori tujuh memiliki handler DM yang dapat dijalankan', async () => {
+  const examples = {
+    'sentence-counter': 'Satu. Dua!', 'paragraph-counter': 'Satu\n\nDua', 'reading-time': 'satu dua tiga',
+    'character-frequency': 'aab', 'remove-diacritics': 'café', 'unicode-normalizer': 'teks',
+    'smart-quotes': '\"halo\"', 'strip-control-chars': '\u0007aman', 'extract-hashtags': '#dafzz #tools',
+    'extract-mentions': '@dafzz @tools', 'extract-phone': '+6281234567890', 'extract-numbers': 'umur 14 tahun',
+    'extract-dates': '26/11/2026', 'initials-generator': 'DAFZZ BOT', 'text-wrap': '--20 ini contoh teks untuk dibungkus',
+    'text-prefixer': 'baris satu\nbaris dua', 'text-suffixer': 'baris satu\nbaris dua',
+    'list-numberer': 'satu\ndua', 'list-bulletizer': 'satu\ndua', 'random-choice': 'merah|biru',
+    'text-repeater': '--2\nHalo', 'template-filler': 'Halo {{nama}}\n---\nnama=DAFZZ',
+    'csv-to-markdown-table': 'nama,umur\nAni,14', 'json-to-typescript': '{\"nama\":\"DAFZZ\"}',
+    'line-numberer': 'satu\ndua'
+  };
+  assert.deepEqual(Object.keys(examples).sort(), [...LOCAL_AI_TOOL_COMMANDS].sort());
+  for (const [slug, input] of Object.entries(examples)) {
+    const result = await handleBotCommand(`.${slug} ${input}`);
+    assert.ok(result && result.type === 'local-tool' && result.reply.length > 0, `.${slug} must execute`);
+    assert.doesNotMatch(result.reply, /belum memiliki handler/i);
+  }
 });
 
 test('webhook HMAC accepts valid signature and rejects stale or altered bodies', () => {

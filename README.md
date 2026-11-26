@@ -5,9 +5,10 @@ Paket gabungan DAFZZ-TOOLS, backend bot TikTok, panel konfigurasi, halaman pemro
 ## Isi paket
 
 - file frontend di folder utama berisi website DAFZZ-TOOLS dari sumber pengguna, dengan tema dan navigasi aslinya tetap dipakai.
-- `tools.json` adalah katalog sumber: tepat 300 tool, 6 kategori, masing-masing 50.
+- `tools.json` adalah katalog sumber: 401 entri. Enam kategori lama tetap memiliki 50 tools per kategori; kategori ke-7 berisi 1 Chat AI unggulan, 50 AI/Local Tools, dan 50 Bot Commands.
 - `admin.html` dan `admin.js` adalah panel konfigurasi bergaya DAFZZ.
 - `bot.html`, `bot.css`, dan `bot-dashboard.js` menyediakan dashboard Menu Bot TT dengan status bot, statistik, koneksi, penyimpanan, AI, dan log aktivitas.
+- `bot-commands.js` menyimpan kode 50 Bot Commands tambahan serta handler DM untuk seluruh 25 AI Tools dan 25 Local Tools baru.
 - file `server.js`, `bot.js`, `store.js`, `security.js`, `ai.js` berisi backend, pengelolaan sesi, webhook TikTok, penyimpanan sementara, dan AI fallback.
 - `docker-compose.yml` menjalankan aplikasi DAFZZ dan TikTok DM bridge dalam jaringan privat.
 - file `setup.sh`, `setup.ps1`, `import-tiktok-session.sh`, `import-tiktok-session.ps1` berisi skrip instalasi awal dan impor sesi TikTok.
@@ -15,9 +16,9 @@ Paket gabungan DAFZZ-TOOLS, backend bot TikTok, panel konfigurasi, halaman pemro
 ## Yang sudah disiapkan
 
 1. Perintah `.menu`, `.help`, `.start`, `.info`, dan `.cancel`.
-2. Perintah kategori `.foto`, `.teks`, `.file`, `.konverter`, `.keamanan`, dan `.web`.
-3. Seluruh slug dari katalog asli bisa dipanggil dengan awalan titik, misalnya `.potong-gambar` atau `.word-to-pdf`.
-4. Perintah tool membalas dengan tautan halaman tool yang benar. Halaman tersebut memakai mesin browser DAFZZ asli.
+2. Perintah kategori `.ai-bot`, `.foto`, `.teks`, `.file`, `.konverter`, `.keamanan`, dan `.web`.
+3. Seluruh slug tools lama tetap dapat dipanggil dengan awalan titik dan membuka sesi tool website. Seluruh 50 AI/Local Tools baru juga dapat dipanggil langsung dari DM, misalnya `.ai-story ide cerita`, `.sentence-counter teks`, atau `.json-to-typescript {\"nama\":\"DAFZZ\"}`.
+4. Kode untuk 50 Bot Commands dan 50 AI/Local Tools baru dikumpulkan dalam `bot-commands.js`. Tool AI memanggil AI sisi server yang sama; tool lokal diproses di bot tanpa API key. Tombol katalog menyiapkan teks perintah agar mudah disalin.
 5. Saat fungsi website menghasilkan file atau teks melalui fungsi hasil standar DAFZZ, hasil dikirim ke server. Server menyimpan file sementara selama 24 jam dan mencoba membalas DM TikTok dengan tautan unduhan.
 6. Panel admin memiliki pengaturan token bridge, webhook secret, alamat publik, kontrol bot ON/OFF, dan AI fallback.
 7. Menu Bot TT menampilkan statistik DM, balasan bot/AI, sesi tool, status bridge/webhook, penyimpanan, dan log aktivitas.
@@ -62,9 +63,9 @@ Skrip mengunduh sumber bridge upstream ke `vendor/tiktok-dm-api`, membangun cont
 
 Sesudah aplikasi hidup, buka:
 
-- Website DAFZZ: `http://127.0.0.1:3000`
-- Dashboard bot: `http://127.0.0.1:3000/bot`
-- Panel konfigurasi: `http://127.0.0.1:3000/admin`
+- Website DAFZZ: `http://127.0.0.1:4010`
+- Dashboard bot: `http://127.0.0.1:4010/bot`
+- Panel konfigurasi: `http://127.0.0.1:4010/admin`
 
 Skrip setup menampilkan token setup admin sekali pakai di terminal. Masukkan token itu dan buat password administrator minimal 12 karakter pada panel. Token ini mencegah orang lain mengambil alih panel sebelum admin pertama dibuat.
 
@@ -91,7 +92,7 @@ docker compose --profile https up -d --build
 
 5. Buka `https://bot.domain-kamu.com/admin` dan masukkan URL publik yang sama pada pengaturan DAFZZ.
 
-Untuk tes lokal tanpa domain, biarkan `NODE_ENV=development`, kosongkan `APP_PUBLIC_URL` dan `PUBLIC_DOMAIN`, lalu gunakan `http://127.0.0.1:3000`. Perintah tool dari TikTok tidak akan mendapatkan link yang dapat dibuka orang lain sampai URL HTTPS publik diisi.
+Untuk tes lokal tanpa domain, biarkan `NODE_ENV=development`, kosongkan `APP_PUBLIC_URL` dan `PUBLIC_DOMAIN`, lalu gunakan `http://127.0.0.1:4010`. Perintah tool dari TikTok tidak akan mendapatkan link yang dapat dibuka orang lain sampai URL HTTPS publik diisi.
 
 ## Menghubungkan akun TikTok milik sendiri
 
@@ -124,15 +125,20 @@ Jangan pernah menempelkan `inbox.fetch`, `socket.fetch`, API token, webhook secr
 
 ## Perintah bot
 
-- `.menu` — 6 kategori dan jumlah tools.
+- `.menu` — 7 kategori dan jumlah tools.
 - `.foto` — 50 tools Foto & Desain.
 - `.teks` — 50 tools Teks & Data.
 - `.file` — 50 tools Dokumen & File.
 - `.konverter` — 50 tools Konverter & Kalkulator.
 - `.keamanan` — 50 tools Keamanan & Privasi.
 - `.web` — 50 tools Web & Developer.
+- `.ai-bot` — kategori Chat AI, 50 AI/Local Tools, dan 50 Bot Commands.
+- `.commands` — daftar 50 perintah Bot Commands.
+- Perintah tambahan antara lain `.pin`, `.anime`, `.pokemon`, `.github`, `.weather`, `.earthquake`, `.iss`, `.trivia`, `.rps`, `.dog`, `.cat`, `.recipe`, `.holidays`, dan `.define`.
+- `.pin` mengambil hingga 10 tautan gambar dari Wikimedia Commons (atau tautan pencarian cadangan); Bridge mengirim tautan teks, bukan lampiran foto.
+- `.s` dan `.toimg` dikenali, tetapi belum dapat memproses media karena Bridge bawaan tidak mendukung lampiran.
 - `.help`, `.start`, `.info`, `.cancel`.
-- Nama tool langsung dengan titik di depan, misalnya `.potong-gambar`.
+- Nama tool langsung dengan titik di depan, misalnya `.potong-gambar` atau `.sentence-counter`.
 
 Sistem ini tidak membuat alur tanya-jawab berbeda untuk setiap parameter secara otomatis. Website sumber tetap meminta input melalui kontrolnya sendiri, termasuk unggahan file, ukuran, teks, pilihan, dan parameter lain. Validasi tiap tool mengikuti implementasi aslinya.
 
@@ -161,10 +167,13 @@ Menu Bot TT tersedia di `/bot`. Halaman ini memerlukan login administrator dan m
 
 ## Catatan kompatibilitas tools
 
-Katalog dipertahankan sebagai 300 entri dalam enam kelompok, tetapi ini bukan berarti setiap fungsi identik dengan layanan desktop profesional. Website sumber sudah mencantumkan batasan untuk beberapa fitur: editor hapus objek/latar bersifat manual, annotasi bukan OCR, analisis dimensi foto bukan pengenalan wajah, beberapa layanan web memerlukan internet dan dapat terkena CORS, serta ekspor dokumen bisa berupa ekspor teks sederhana yang tidak mempertahankan seluruh tata letak. Beberapa library PDF/DOCX/XLSX dimuat dari CDN saat pertama digunakan.
+Katalog berisi 401 entri dalam tujuh kategori: 300 tools lama tetap dipertahankan, sedangkan kategori ke-7 berisi Chat AI, 50 AI/Local Tools, dan 50 Bot Commands. Ini bukan berarti setiap fungsi identik dengan layanan desktop profesional. Website sumber sudah mencantumkan batasan untuk beberapa fitur: editor hapus objek/latar bersifat manual, annotasi bukan OCR, analisis dimensi foto bukan pengenalan wajah, beberapa layanan web memerlukan internet dan dapat terkena CORS, serta ekspor dokumen bisa berupa ekspor teks sederhana yang tidak mempertahankan seluruh tata letak. Beberapa library PDF/DOCX/XLSX dimuat dari CDN saat pertama digunakan.
 
 Laporan pemeriksaan teknis ada di `QA-REPORT.txt`. Pengujian integrasi langsung dengan akun TikTok belum dilakukan karena membutuhkan sesi akun milik pemiliknya.
 
+
+## STRUKTUR ARSIP
+ZIP memuat satu folder proyek utama. File-file aplikasi berada langsung di bawah folder tersebut; file baru `bot-commands.js` menampung seluruh 50 handler perintah bot.
 
 ## STRUKTUR FILE DATAR
 Semua file bawaan ZIP diletakkan langsung di folder utama, tanpa subfolder `public`, `src`, `scripts`, `tests`, atau `vendor`. Nama file dibuat unik agar tidak ada yang tertimpa. Saat `setup.sh` dijalankan, folder `vendor/tiktok-dm-api` akan dibuat otomatis untuk source bridge eksternal yang dibutuhkan Docker.

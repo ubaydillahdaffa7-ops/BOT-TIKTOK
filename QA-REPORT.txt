@@ -1,85 +1,54 @@
 DAFZZ TIKTOK BOT - LAPORAN PEMERIKSAAN BUILD
 ============================================
 
-SUMBER KATALOG
---------------
-- tools.json aktual: 300 entri.
-- Kategori: foto 50, teks 50, file 50, konverter 50, keamanan 50, web 50.
-- Jumlah slug unik: 300.
-- tools.json menjadi sumber kebenaran untuk jumlah dan pembagian kategori.
-- README/QA pada arsip website sumber menyebut tujuh kategori; teks lama itu
-  tidak sesuai dengan katalog aktual. Dokumentasi paket ini telah dikoreksi.
+KATALOG
+-------
+- Total katalog: 401 entri dengan 401 slug unik.
+- Enam kategori sumber tetap utuh: foto, teks, file, konverter, keamanan, web; masing-masing 50 tools.
+- Kategori ke-7 AI & Bot Commands: 1 Chat AI unggulan, 50 AI/Local Tools, 50 Bot Commands.
+- tools.json menjadi sumber kebenaran jumlah dan grup katalog.
 
-FITUR BOT DAN WEBSITE YANG DITAMBAHKAN
--------------------------------------
-- Backend Node.js dan Express.
-- Webhook TikTok dengan pemeriksaan HMAC-SHA256, timestamp, event ID, dan
-  deduplikasi event.
-- Perintah .menu, .help, .start, .info, .cancel, enam perintah kategori,
-  dan perintah langsung untuk seluruh slug katalog.
-- Link halaman tool per sesi dengan masa berlaku 24 jam.
-- Upload hasil dari browser ke server dan tautan download privat yang berlaku
-  24 jam. Link unduh juga muncul di halaman tool jika notifikasi DM gagal.
-- File Blob yang dibuat lewat jalur download browser dialihkan ke server saat sesi
-  TikTok aktif agar hasil tetap dapat dikirim sebagai tautan.
-- Panel admin dengan password hash scrypt, session cookie, CSRF token, token
-  setup sekali pakai, pembatasan percobaan login, dan tampilan mengikuti warna DAFZZ.
-- AI fallback bawaan Pollinations pada endpoint legacy OpenAI-compatible yang dipakai website DAFZZ AI v3.0; balasan cadangan saat layanan gagal.
-- Mode AI manual untuk endpoint HTTPS OpenAI-compatible dan API key tersimpan di server.
-- Dashboard Menu Bot TT dengan kontrol ON/OFF, statistik, status bridge/webhook, status penyimpanan, AI, dan 120 log aktivitas terbaru.
-- Docker Compose untuk app, bridge, volume persisten, dan profil Caddy HTTPS.
+FITUR YANG DITAMBAHKAN
+---------------------
+- Kategori ke-7 berbentuk kartu lebar di atas enam kategori lama; ikon menggunakan SVG garis.
+- Chat AI menjadi kartu unggulan di urutan paling atas di dalam kategori ke-7.
+- 25 fitur AI menggunakan endpoint AI sisi server yang sama dengan AI fallback; API key tidak dikirim ke browser. Perintah DM-nya juga terhubung ke handler di bot-commands.js.
+- 25 Local Tools dapat diproses di browser tanpa API key dan memiliki handler DM di bot-commands.js.
+- 50 Bot Commands tambahan tersimpan di bot-commands.js dan terhubung ke webhook TikTok.
+- Seluruh 50 AI/Local Tools baru memiliki properti perintah .slug dan dapat dijalankan langsung di DM.
+- Navigasi Tools, Bot TT, dan Lanjutan menggunakan ikon SVG serta efek hover/tekan ringan.
+- Panel konfigurasi admin ditingkatkan dengan panel gradien, input fokus neon, animasi halus, dan efek sentuh.
+- Dashboard Bot TT dipertahankan dengan penyesuaian jumlah katalog dan efek kontrol ringan.
 
-PENGUJIAN YANG DILAKUKAN PADA PAKET BUILD
-----------------------------------------
-- Pemeriksaan sintaks JavaScript melalui node --check.
-- Uji konfigurasi Pollinations otomatis dan mode AI manual melalui unit test.
-- Uji unit katalog: total, jumlah per kategori, slug unik, dan data wajib.
-- Uji helper tanda tangan webhook: signature benar, body berubah, timestamp
-  kedaluwarsa, dan secret kosong.
-- Uji sanitasi nama file dan validasi URL admin.
+KETERANGAN BOT COMMANDS
+-----------------------
+- Perintah .pin mencari hingga 10 gambar dan mengirim URL gambar dari Wikimedia Commons; jika pencarian tidak tersedia, perintah memberikan tautan pencarian gambar cadangan. Bridge saat ini hanya mendukung pesan teks sehingga gambar belum dikirim sebagai lampiran.
+- Perintah .s dan .toimg dikenali tetapi memberi pesan kemampuan media belum tersedia. Fitur sungguhan memerlukan Bridge dengan dukungan penerimaan dan pengiriman media.
+- Perintah berbasis layanan eksternal membutuhkan koneksi internet dan mengikuti ketersediaan/rate limit penyedia masing-masing.
+- Tombol command di katalog hanya menyiapkan teks perintah untuk disalin; pengiriman DM dilakukan dari akun TikTok pengguna.
+
+PENGUJIAN
+---------
+- Pemeriksaan sintaks semua modul JavaScript melalui npm run check.
+- Unit test katalog: 401 entri, 401 slug unik, 300 tools lama tetap terbagi 6 x 50, dan grup baru 1 + 50 + 50.
+- Uji 50 nama Bot Commands unik, 25 handler AI, dan eksekusi 25 Local Tools dari DM.
+- Uji command lokal .choose, .sentence-counter, .extract-hashtags, .json-to-typescript, batas .pin, pesan batasan media .s, serta penolakan alias utility duplikat .calc.
+- Uji helper tanda tangan webhook, sanitasi nama file, validasi URL admin, konfigurasi AI otomatis Pollinations dan AI manual.
 
 BELUM DIUJI
 -----------
-- Belum diuji terhadap akun TikTok nyata karena impor sesi harus dilakukan oleh
-  pemilik akun pada server miliknya.
-- Belum diuji pengiriman DM nyata dan penerimaan webhook live.
-- Belum diuji proses browser end-to-end pada perangkat Android dan desktop.
-- Dependensi npm dan image Docker perlu diunduh saat proses instalasi; runtime
-  server tidak dijalankan di lingkungan pembuatan ZIP ini.
-- Uji panggilan langsung Pollinations dari lingkungan build tidak dapat dilakukan
-  karena DNS jaringan eksternal tidak tersedia; tombol Uji koneksi AI tersedia
-  di panel admin setelah aplikasi dijalankan di server.
-- Seluruh 300 tool belum diklik dan diuji satu per satu setelah integrasi bot.
-
-BATASAN YANG SUDAH DIKETAHUI DARI WEBSITE SUMBER
------------------------------------------------
-- Tidak semua tool merupakan konversi/pemrosesan tingkat profesional.
-- DNS/RDAP/IP memerlukan internet dan layanan eksternal.
-- Fetch lintas domain dapat dibatasi oleh CORS.
-- Sprite Sheet adalah PNG statis, bukan GIF animasi.
-- Annotasi Gambar bukan OCR otomatis.
-- Analisis Dimensi Foto bukan deteksi wajah.
-- Penghapusan objek/latar menggunakan editor manual, bukan AI inpainting.
-- PDF Metadata Inspector dan pencarian teks PDF membutuhkan PDF.js dari CDN.
-- PDF scan yang hanya berisi gambar tidak dapat dicari tanpa OCR.
-- Ekspor PDF/Word/Excel/PPT dapat menyederhanakan tata letak dokumen.
-- Konversi AVIF bergantung dukungan browser.
+- Tidak seluruh 300 tools lama diklik dan diuji satu per satu setelah integrasi; fungsi lama tidak sengaja diubah.
+- Layanan API eksternal command tidak dipanggil satu per satu saat build karena memerlukan internet dan dapat terkena rate limit.
+- Tidak diuji dengan akun TikTok nyata, DM live, atau webhook live karena memerlukan sesi akun pemilik.
+- Tidak diuji end-to-end pada Android dan desktop.
+- Runtime server dan image Docker tidak dijalankan dalam proses pengemasan ZIP.
 
 BATASAN CONNECTOR TIKTOK
 ------------------------
-Konektor pihak ketiga yang digunakan bersifat tidak resmi dan eksperimental.
-Menurut dokumentasi upstream, dukungan terbatas ke percakapan satu lawan satu
-yang sudah ada dan pesan teks. Tidak mendukung media upload/download, login QR,
-pembaruan sesi otomatis, grup, permintaan DM baru, atau pengiriman ke username
-sembarang. Protokol dapat berubah tanpa pemberitahuan.
+Konektor pihak ketiga yang digunakan tidak resmi dan eksperimental. Dokumentasi upstream untuk build ini menyatakan dukungan terbatas pada percakapan satu lawan satu yang sudah ada dan pesan teks. Konektor tidak mendukung upload/download media, login QR, pembaruan sesi otomatis, grup, permintaan DM baru, atau pengiriman ke username sembarang. Protokol dapat berubah.
 
 STATUS
 ------
-Build berisi website sumber, katalog 300 tools, backend bot, panel admin,
-halaman hasil dan download, serta installer untuk bridge eksternal. Build ini
-sudah melewati pemeriksaan sintaks dan unit test yang tercantum di atas. Build
-belum bisa dinyatakan bebas bug atau siap produksi sebelum dipasang, sesi akun
-TikTok diimpor, dan pengujian live dilakukan.
+Build telah melewati pemeriksaan sintaks dan unit test lokal yang tercantum di atas. Hasil ini bukan jaminan bebas bug atau siap produksi. Pengujian pada server, akun TikTok, dan bridge milik pengguna tetap diperlukan.
 
-
-Catatan paket datar: seluruh file proyek dipindahkan ke folder utama ZIP; file tidak dihapus.
+Arsip ZIP memiliki satu folder proyek utama dan seluruh file aplikasi tersimpan di dalamnya.

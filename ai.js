@@ -8,7 +8,8 @@ const SYSTEM_PROMPT = [
   'Kamu adalah DAFZZ BOT, asisten percakapan yang ramah dan membantu pengguna Indonesia.',
   'Jawab dalam bahasa Indonesia yang natural, jelas, relevan, dan tidak bertele-tele.',
   'Jangan gunakan emoji. Jangan mengaku bisa menjalankan fitur yang belum tersedia.',
-  'DAFZZ memiliki 300 tools dalam enam kategori: Foto & Desain, Teks & Data, Dokumen & File, Konverter & Kalkulator, Keamanan & Privasi, Web & Developer.',
+  'DAFZZ memiliki 401 entri dalam tujuh kategori: AI & Bot Commands, Foto & Desain, Teks & Data, Dokumen & File, Konverter & Kalkulator, Keamanan & Privasi, Web & Developer.',
+  'Kategori AI & Bot Commands berisi Chat AI, 50 alat AI/lokal, dan 50 perintah bot TikTok. Jangan mengaku bisa mengirim foto atau stiker lewat TikTok Bridge bawaan karena konektor yang dipasang hanya mendukung pesan teks.',
   'Jika pengguna ingin memakai tool DAFZZ, arahkan untuk mengetik .menu atau nama perintah tool.',
   'Jika pesan tidak jelas, minta penjelasan singkat. Jangan meminta password, cookie, token, atau data rahasia.'
 ].join(' ');
@@ -38,10 +39,11 @@ export function isFallbackAIResponse(answer) {
 export async function askFreeAI(userText, context = {}) {
   const settings = getDb().settings;
   const prefix = settings.fallbackPrefix || 'Maaf kamu ngetik apa mpruy';
-  if (!settings.aiEnabled) return getFallback(prefix, 'Fitur AI sedang dinonaktifkan. Ketik .menu untuk melihat perintah yang tersedia.');
+  const format = detail => context.includePrefix === false ? detail : getFallback(prefix, detail);
+  if (!settings.aiEnabled) return format('Fitur AI sedang dinonaktifkan. Ketik .menu untuk melihat perintah yang tersedia.');
 
   const config = resolveAIConfiguration(settings);
-  if (!config.endpoint || !config.model) return getFallback(prefix, 'Konfigurasi AI belum lengkap. Hubungi administrator.');
+  if (!config.endpoint || !config.model) return format('Konfigurasi AI belum lengkap. Hubungi administrator.');
 
   const headers = { 'Content-Type': 'application/json' };
   if (config.apiKey) headers.Authorization = `Bearer ${config.apiKey}`;
@@ -82,13 +84,13 @@ export async function askFreeAI(userText, context = {}) {
     }
     answer = answer.trim();
     if (!answer) throw new Error('AI tidak mengirim jawaban teks');
-    return `${prefix}\n${answer.slice(0, 3400)}`;
+    return context.includePrefix === false ? answer.slice(0, 3400) : `${prefix}\n${answer.slice(0, 3400)}`;
   } catch (error) {
     console.warn('[ai-fallback]', error?.message || error);
     logActivity('ai_error', error?.name === 'AbortError' ? 'AI terlalu lama merespons' : 'Layanan AI gagal memberikan jawaban');
     await persist().catch(() => {});
-    if (error?.name === 'AbortError') return getFallback(prefix, 'Layanan AI terlalu lama merespons. Coba lagi nanti atau ketik .menu.');
-    return getFallback(prefix, 'AI tidak dapat menjawab saat ini. Coba lagi nanti atau ketik .menu.');
+    if (error?.name === 'AbortError') return format('Layanan AI terlalu lama merespons. Coba lagi nanti atau ketik .menu.');
+    return format('AI tidak dapat menjawab saat ini. Coba lagi nanti atau ketik .menu.');
   } finally {
     clearTimeout(timeout);
   }
