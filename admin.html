@@ -9,8 +9,11 @@
   <link rel="stylesheet" href="/admin.css">
 </head>
 <body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <div class="ambient-rail rail-one" aria-hidden="true"></div>
+  <div class="ambient-rail rail-two" aria-hidden="true"></div>
   <header class="topbar">
-    <a class="brand" href="/">ᙃᴀ̷𝖿ᴢᴢ<span>--Tools</span></a>
+    <a class="brand" href="/" aria-label="DAFZZ beranda"><span class="brand-mark">D</span><span class="brand-name">DAFZZ<span class="brand-blue">-TOOLS</span></span></a>
     <nav aria-label="Navigasi utama">
       <a class="config-nav-link menu-nav-link" href="/" aria-label="Tools" title="Tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 17.5 9.5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13 8 3 3"/></svg><span>Tools</span></a>
       <a class="config-nav-link bot-nav-link" href="/bot" aria-label="Bot TT" title="Bot TT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>Bot TT</span></a>
@@ -104,7 +107,7 @@
               <option value="custom">AI manual — API key sendiri</option>
             </select>
           </div>
-          <div id="pollinationsInfo" class="inline-note">Mode otomatis memakai endpoint Pollinations yang sudah diuji pada DAFZZ AI v3.0: text.pollinations.ai/openai, model openai. Tidak perlu mengisi API key pada mode ini.</div>
+          <div id="pollinationsInfo" class="inline-note">Mode otomatis mencoba Pollinations terlebih dahulu, lalu tiga layanan AI cadangan gratis tanpa API key jika layanan sebelumnya gagal. Kuota dan ketersediaan mengikuti masing-masing penyedia.</div>
           <div id="aiCustomFields" class="hidden">
             <div class="control">
               <label class="control-label" for="aiEndpoint">Endpoint OpenAI-compatible</label>

@@ -22,7 +22,7 @@ Paket gabungan DAFZZ-TOOLS, backend bot TikTok, panel konfigurasi, halaman pemro
 5. Saat fungsi website menghasilkan file atau teks melalui fungsi hasil standar DAFZZ, hasil dikirim ke server. Server menyimpan file sementara selama 24 jam dan mencoba membalas DM TikTok dengan tautan unduhan.
 6. Panel admin memiliki pengaturan token bridge, webhook secret, alamat publik, kontrol bot ON/OFF, dan AI fallback.
 7. Menu Bot TT menampilkan statistik DM, balasan bot/AI, sesi tool, status bridge/webhook, penyimpanan, dan log aktivitas.
-8. Pesan yang bukan perintah diarahkan ke Pollinations AI melalui endpoint yang dipakai website DAFZZ AI v3.0. Mode AI manual juga tersedia untuk endpoint OpenAI-compatible dan API key milik pengguna. Awalan balasan bawaan adalah `Maaf kamu ngetik apa mpruy`.
+8. Pesan yang bukan perintah diarahkan ke Pollinations AI melalui endpoint yang dipakai website DAFZZ AI v3.0. Jika gagal, sistem mencoba tiga gateway AI cadangan tanpa API key secara berurutan (JarvisClaw Free, Free.ai, dan Kilo Gateway Free). Mode AI manual juga tersedia untuk endpoint OpenAI-compatible dan API key milik pengguna; jika endpoint manual gagal, tiga gateway cadangan tetap dicoba. Awalan balasan bawaan adalah `Maaf kamu ngetik apa mpruy`.
 9. Sesi tool dan tautan unduhan memiliki masa berlaku 24 jam. File sementara dibersihkan secara berkala.
 
 ## Batasan integrasi TikTok yang perlu dibaca
@@ -144,7 +144,7 @@ Sistem ini tidak membuat alur tanya-jawab berbeda untuk setiap parameter secara 
 
 ## AI otomatis Pollinations dan AI manual
 
-Mode AI bawaan menggunakan endpoint OpenAI-compatible Pollinations yang sudah dipakai dan diuji pada website DAFZZ AI v3.0:
+Mode AI bawaan menggunakan endpoint OpenAI-compatible Pollinations yang sudah dipakai pada website DAFZZ AI v3.0. Jika gagal, server mencoba tiga gateway gratis tanpa API key secara berurutan: JarvisClaw Free (`api.jarvisclaw.ai`, model `auto/free`), Free.ai (`api.free.ai`, model `deepseek-r1`), dan Kilo Gateway Free (`api.kilo.ai`, model `kilo-auto/free`). Setiap layanan memiliki batas penggunaan dan ketersediaan yang dapat berubah; ini bukan jaminan AI selalu online. Endpoint utama:
 
 - Endpoint: `https://text.pollinations.ai/openai`
 - Model alias: `openai`
@@ -154,7 +154,7 @@ Jika layanan legacy tersebut berubah, membatasi akses, atau tidak tersedia, bot 
 
 Panel `/admin` juga menyediakan mode AI manual. Administrator dapat memasukkan endpoint HTTPS OpenAI-compatible, nama model, dan API key penyedia sendiri. API key disimpan hanya di sisi server di file data privat; API overview tidak mengirim nilai key ke browser. Dokumentasi Pollinations saat ini juga menjelaskan API generasi baru di `https://gen.pollinations.ai/v1/chat/completions` dengan header `Authorization: Bearer ...` dan model ID katalog, sehingga administrator dapat memakai mode manual, mengisi URL tersebut, model yang tersedia, serta secret key Pollinations bila endpoint lama tidak lagi menerima permintaan. Dokumentasi resmi: https://gen.pollinations.ai/docs.
 
-Menu Bot TT tersedia di `/bot`. Halaman ini memerlukan login administrator dan menyediakan kontrol ON/OFF bot, status bridge dan webhook, statistik, penyimpanan, AI fallback, serta log aktivitas terbaru. Saat bot OFF, webhook yang valid diakui oleh server tetapi pesan tidak diproses atau dibalas.
+Metadata Open Graph dan gambar preview `og-preview.png` disediakan agar tautan beranda menampilkan judul, deskripsi, dan gambar saat dibagikan ke aplikasi pesan yang mendukung link preview. URL gambar dibuat absolut berdasarkan domain publik yang terdeteksi atau `APP_PUBLIC_URL`/pengaturan URL publik. Menu Bot TT tersedia di `/bot`. Halaman ini memerlukan login administrator dan menyediakan kontrol ON/OFF bot, status bridge dan webhook, statistik, penyimpanan, AI fallback, serta log aktivitas terbaru. Saat bot OFF, webhook yang valid diakui oleh server tetapi pesan tidak diproses atau dibalas.
 
 ## Data dan penyimpanan
 

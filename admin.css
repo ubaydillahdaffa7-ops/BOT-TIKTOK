@@ -53,3 +53,46 @@
 @media(max-width:650px){.topbar nav{gap:4px}.topbar .config-nav-link{gap:4px;padding:7px 6px;font-size:8px}.topbar .config-nav-link svg{width:15px;height:15px}}
 @media(max-width:390px){.topbar .config-nav-link span{display:none}.topbar .config-nav-link{width:31px;height:31px;justify-content:center;padding:6px}.topbar .config-nav-link svg{width:17px;height:17px}}
 @media(prefers-reduced-motion:reduce){.topbar .config-nav-link{transition:none!important}}
+
+
+/* DAFZZ unified control-room finish: align Konfigurasi Sistem with Menu Bot TT. */
+.admin-container{max-width:1220px;padding-top:34px}
+.admin-heading{display:block;padding:27px 0 25px;margin:10px 0 20px;border-bottom:1px solid #27425d;position:relative}
+.admin-heading:after{content:"";position:absolute;left:0;bottom:-1px;width:165px;height:1px;background:#4db5ff;box-shadow:0 0 16px #168bff}
+.admin-heading h1{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:clamp(42px,6vw,62px);line-height:1;letter-spacing:-.065em;font-weight:780;margin:0 0 13px;background:linear-gradient(100deg,#f0f7ff 18%,#8ccfff 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.admin-heading>div:first-child>.eyebrow{margin-bottom:15px}
+.admin-heading>div:first-child>.muted{max-width:680px;font-size:13px;line-height:1.8;color:#9db2c9}
+.admin-heading-actions{margin-top:19px;display:flex;gap:9px}
+.admin-heading-actions .btn{min-width:145px}
+.metric-grid{gap:11px;margin:20px 0 31px}
+.metric-card{min-height:130px;position:relative;overflow:hidden;padding:17px 16px;border-radius:10px;background:linear-gradient(145deg,#102137,#0a1524);border-color:#203c57}
+.metric-card:before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:2px;background:linear-gradient(transparent,#2999ec,transparent);opacity:.75}
+.metric-card:after{content:"";position:absolute;width:105px;height:105px;right:-58px;bottom:-68px;border:1px solid #328ed022;border-radius:50%;box-shadow:0 0 0 12px #168bff08,0 0 0 24px #168bff05;pointer-events:none}
+.metric-card strong{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:29px;font-weight:700;margin:3px 0}
+.metric-label{font-size:8px;letter-spacing:.15em;color:#7291b1}
+.metric-card small{font-size:9px;line-height:1.5;color:#708aa6}
+.admin-section{margin:28px 0 0;padding:21px;border:1px solid #223f5b;border-radius:12px;background:linear-gradient(145deg,#0e1d30,#091523);box-shadow:0 16px 42px #0002,inset 0 1px #ffffff06}
+.admin-section:before{height:2px;background:linear-gradient(90deg,#168bff,#9bdcff70,transparent)}
+.admin-section>.section-title{align-items:center;margin-bottom:17px}
+.admin-section>.section-title h2,.admin-section>h2{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:22px;letter-spacing:-.045em}
+.admin-section .eyebrow{margin-bottom:8px}
+.connection-grid{gap:11px}
+.info-card{min-height:155px;padding:18px;border-radius:10px;background:linear-gradient(130deg,#102137,#0a1727);border-color:#233f5b;position:relative;overflow:hidden}
+.info-card:after{content:"";position:absolute;width:110px;height:110px;right:-65px;bottom:-72px;border:1px solid #328ed022;border-radius:50%;box-shadow:0 0 0 13px #168bff07;pointer-events:none}
+.info-card h3{font-size:15px;letter-spacing:-.025em}
+.info-card p{color:#8ca4be;font-size:10px;line-height:1.7}
+.settings-form{margin-top:12px;padding:20px;border-radius:11px;background:linear-gradient(145deg,#102239,#0b1728);border-color:#294866}
+.form-section-head h3{font-size:14px;color:#e3f1ff}
+.form-section-head p{font-size:10px;color:#829bb5}
+.settings-form .control-label{font-size:9px;letter-spacing:.12em;color:#91acc7}
+.settings-form .field{font-size:12px;color:#e9f4ff}
+.settings-form .toggle-line strong{font-size:11px}
+.settings-form .toggle-line p{font-size:10px;color:#829bb5}
+.settings-form .btn,.admin-heading-actions .btn{min-height:40px;border-radius:8px}
+.status-pill{border-radius:5px;font-size:8px;font-weight:800;letter-spacing:.12em;padding:7px 9px}
+.category-row{min-height:64px;border-radius:9px;background:linear-gradient(135deg,#102239,#0b1727)}
+.auth-panel{max-width:620px;margin:58px auto 100px}
+.auth-panel h1{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:clamp(34px,5vw,48px);letter-spacing:-.055em}
+@media(max-width:760px){.admin-container{padding-top:20px}.admin-heading{padding:19px 0 21px}.admin-heading h1{font-size:clamp(39px,11vw,51px)}.admin-heading-actions{width:100%}.admin-heading-actions .btn{flex:1}.metric-grid{gap:8px;margin:15px 0 25px}.metric-card{min-height:112px;padding:13px 12px}.metric-card strong{font-size:25px}.admin-section{padding:16px 13px;margin-top:22px}.settings-form{padding:14px}.info-card{min-height:135px;padding:15px}.admin-section>.section-title{align-items:flex-start}}
+@media(max-width:390px){.metric-card strong{font-size:23px}.metric-label{font-size:7px}.metric-card small{font-size:8px}.admin-heading-actions .btn{padding:10px 8px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.admin-heading:after{animation:none}.metric-card,.info-card,.category-row,.settings-form .field,.settings-form .btn{transition:none!important}}

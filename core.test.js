@@ -229,3 +229,30 @@ test('manual AI fallback sends the API key only as a server-side bearer header',
     Object.assign(settings, previousSettings);
   }
 });
+
+test('automatic AI tries three keyless backup gateways after the primary fails', async () => {
+  const settings = getDb().settings;
+  const previousSettings = { ...settings };
+  const previousFetch = globalThis.fetch;
+  const attempted = [];
+  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', fallbackPrefix: 'DAFZZ:' });
+  globalThis.fetch = async (url) => {
+    attempted.push(String(url));
+    if (attempted.length < 4) return new Response('temporary unavailable', { status: 503 });
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Jawaban dari AI cadangan ketiga.' } }] }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  try {
+    const answer = await askFreeAI('Uji failover AI');
+    assert.equal(attempted.length, 4);
+    assert.equal(attempted[0], 'https://text.pollinations.ai/openai');
+    assert.equal(attempted[1], 'https://api.jarvisclaw.ai/v1/chat/completions');
+    assert.equal(attempted[2], 'https://api.free.ai/v1/chat/completions');
+    assert.equal(attempted[3], 'https://api.kilo.ai/api/gateway/chat/completions');
+    assert.match(answer, /Jawaban dari AI cadangan ketiga/);
+  } finally {
+    globalThis.fetch = previousFetch;
+    Object.assign(settings, previousSettings);
+  }
+});

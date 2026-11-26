@@ -17,7 +17,9 @@ FITUR YANG DITAMBAHKAN
 - 50 Bot Commands tambahan tersimpan di bot-commands.js dan terhubung ke webhook TikTok.
 - Seluruh 50 AI/Local Tools baru memiliki properti perintah .slug dan dapat dijalankan langsung di DM.
 - Navigasi Tools, Bot TT, dan Lanjutan menggunakan ikon SVG serta efek hover/tekan ringan.
-- Panel konfigurasi admin ditingkatkan dengan panel gradien, input fokus neon, animasi halus, dan efek sentuh.
+- Panel konfigurasi admin diselaraskan dengan gaya visual Menu Bot TT: hero besar, garis aksen, kartu statistik bercahaya halus, panel koneksi, input fokus, dan animasi sentuh ringan.
+- Metadata Open Graph/Twitter dan gambar preview PNG 1200x630 ditambahkan untuk pratinjau link saat website dibagikan.
+- AI fallback memiliki satu provider utama dan tiga gateway cadangan tanpa API key yang dicoba berurutan; timeout per provider dibatasi 12 detik.
 - Dashboard Bot TT dipertahankan dengan penyesuaian jumlah katalog dan efek kontrol ringan.
 
 KETERANGAN BOT COMMANDS
@@ -33,10 +35,12 @@ PENGUJIAN
 - Unit test katalog: 401 entri, 401 slug unik, 300 tools lama tetap terbagi 6 x 50, dan grup baru 1 + 50 + 50.
 - Uji 50 nama Bot Commands unik, 25 handler AI, dan eksekusi 25 Local Tools dari DM.
 - Uji command lokal .choose, .sentence-counter, .extract-hashtags, .json-to-typescript, batas .pin, pesan batasan media .s, serta penolakan alias utility duplikat .calc.
-- Uji helper tanda tangan webhook, sanitasi nama file, validasi URL admin, konfigurasi AI otomatis Pollinations dan AI manual.
+- Uji helper tanda tangan webhook, sanitasi nama file, validasi URL admin, konfigurasi AI otomatis Pollinations dan AI manual, serta urutan failover tiga gateway cadangan (mock test).
 
 BELUM DIUJI
 -----------
+- Tiga endpoint AI cadangan diuji melalui simulasi failover otomatis, tetapi tidak dapat dipanggil langsung dari lingkungan build ini. Ketersediaan real-time, kuota, dan kebijakan layanan perlu dipastikan saat aplikasi berjalan di server pengguna.
+- Pratinjau Open Graph telah diperiksa dari struktur HTML dan aset PNG lokal; crawler WhatsApp/Telegram belum dapat diuji langsung karena domain publik pengguna belum diketahui.
 - Tidak seluruh 300 tools lama diklik dan diuji satu per satu setelah integrasi; fungsi lama tidak sengaja diubah.
 - Layanan API eksternal command tidak dipanggil satu per satu saat build karena memerlukan internet dan dapat terkena rate limit.
 - Tidak diuji dengan akun TikTok nyata, DM live, atau webhook live karena memerlukan sesi akun pemilik.
@@ -51,4 +55,4 @@ STATUS
 ------
 Build telah melewati pemeriksaan sintaks dan unit test lokal yang tercantum di atas. Hasil ini bukan jaminan bebas bug atau siap produksi. Pengujian pada server, akun TikTok, dan bridge milik pengguna tetap diperlukan.
 
-Arsip ZIP memiliki satu folder proyek utama dan seluruh file aplikasi tersimpan di dalamnya.
+Arsip ZIP memiliki satu folder proyek utama dan seluruh file aplikasi tersimpan di dalamnya. Jumlah file proyek pada arsip revisi ini lebih dari 37 file.

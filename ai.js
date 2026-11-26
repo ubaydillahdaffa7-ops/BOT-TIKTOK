@@ -1,9 +1,17 @@
 import { getDb, logActivity, persist } from './store.js';
 
-// Preserve the exact legacy endpoint from the DAFZZ AI v3.0 code the user tested.
-// The current Pollinations API is also configurable through the custom mode.
+// Primary provider: the exact legacy Pollinations endpoint already used by the user's working site.
 const POLLINATIONS_ENDPOINT = 'https://text.pollinations.ai/openai';
 const POLLINATIONS_MODEL = 'openai';
+
+// Three keyless fallback gateways. These are best-effort community services;
+// their free quotas, availability, and terms can change without notice.
+const FREE_FALLBACKS = [
+  { name: 'JarvisClaw Free', endpoint: 'https://api.jarvisclaw.ai/v1/chat/completions', model: 'auto/free' },
+  { name: 'Free.ai', endpoint: 'https://api.free.ai/v1/chat/completions', model: 'deepseek-r1' },
+  { name: 'Kilo Gateway Free', endpoint: 'https://api.kilo.ai/api/gateway/chat/completions', model: 'kilo-auto/free' }
+];
+const PROVIDER_TIMEOUT_MS = 12000;
 const SYSTEM_PROMPT = [
   'Kamu adalah DAFZZ BOT, asisten percakapan yang ramah dan membantu pengguna Indonesia.',
   'Jawab dalam bahasa Indonesia yang natural, jelas, relevan, dan tidak bertele-tele.',
@@ -36,27 +44,16 @@ export function isFallbackAIResponse(answer) {
   return failureHints.some(hint => String(answer || '').includes(hint));
 }
 
-export async function askFreeAI(userText, context = {}) {
-  const settings = getDb().settings;
-  const prefix = settings.fallbackPrefix || 'Maaf kamu ngetik apa mpruy';
-  const format = detail => context.includePrefix === false ? detail : getFallback(prefix, detail);
-  if (!settings.aiEnabled) return format('Fitur AI sedang dinonaktifkan. Ketik .menu untuk melihat perintah yang tersedia.');
-
-  const config = resolveAIConfiguration(settings);
-  if (!config.endpoint || !config.model) return format('Konfigurasi AI belum lengkap. Hubungi administrator.');
-
-  const headers = { 'Content-Type': 'application/json' };
-  if (config.apiKey) headers.Authorization = `Bearer ${config.apiKey}`;
-
+async function requestProvider(provider, userText) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 22_000);
+  const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
   try {
-    const response = await fetch(config.endpoint, {
+    const response = await fetch(provider.endpoint, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json', ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {}) },
       signal: controller.signal,
       body: JSON.stringify({
-        model: config.model,
+        model: provider.model,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: String(userText).slice(0, 4000) }
@@ -68,9 +65,8 @@ export async function askFreeAI(userText, context = {}) {
     });
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
-      throw new Error(`AI endpoint HTTP ${response.status}${errorText ? `: ${errorText.slice(0, 160)}` : ''}`);
+      throw new Error(`HTTP ${response.status}${errorText ? `: ${errorText.slice(0, 120)}` : ''}`);
     }
-
     const contentType = response.headers.get('content-type') || '';
     let answer = '';
     if (contentType.includes('application/json')) {
@@ -83,21 +79,55 @@ export async function askFreeAI(userText, context = {}) {
       answer = await response.text();
     }
     answer = answer.trim();
-    if (!answer) throw new Error('AI tidak mengirim jawaban teks');
-    return context.includePrefix === false ? answer.slice(0, 3400) : `${prefix}\n${answer.slice(0, 3400)}`;
-  } catch (error) {
-    console.warn('[ai-fallback]', error?.message || error);
-    logActivity('ai_error', error?.name === 'AbortError' ? 'AI terlalu lama merespons' : 'Layanan AI gagal memberikan jawaban');
-    await persist().catch(() => {});
-    if (error?.name === 'AbortError') return format('Layanan AI terlalu lama merespons. Coba lagi nanti atau ketik .menu.');
-    return format('AI tidak dapat menjawab saat ini. Coba lagi nanti atau ketik .menu.');
+    if (!answer) throw new Error('Provider mengirim jawaban kosong');
+    return answer.slice(0, 3400);
   } finally {
     clearTimeout(timeout);
   }
 }
 
+function getProviderChain(settings) {
+  const config = resolveAIConfiguration(settings);
+  const primary = config.mode === 'custom'
+    ? { name: 'AI Manual', endpoint: config.endpoint, model: config.model, apiKey: config.apiKey }
+    : { name: 'Pollinations AI', endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL };
+  return [primary, ...FREE_FALLBACKS];
+}
+
+export async function askFreeAI(userText, context = {}) {
+  const settings = getDb().settings;
+  const prefix = settings.fallbackPrefix || 'Maaf kamu ngetik apa mpruy';
+  const format = detail => context.includePrefix === false ? detail : getFallback(prefix, detail);
+  if (!settings.aiEnabled) return format('Fitur AI sedang dinonaktifkan. Ketik .menu untuk melihat perintah yang tersedia.');
+
+  const providers = getProviderChain(settings);
+  const failures = [];
+  for (const provider of providers) {
+    if (!provider.endpoint || !provider.model) {
+      failures.push(`${provider.name}: konfigurasi tidak lengkap`);
+      continue;
+    }
+    try {
+      const answer = await requestProvider(provider, userText);
+      logActivity('ai_provider', `Jawaban AI melalui ${provider.name}`);
+      return context.includePrefix === false ? answer : `${prefix}\n${answer}`;
+    } catch (error) {
+      const reason = error?.name === 'AbortError' ? 'timeout' : (error?.message || 'gagal');
+      failures.push(`${provider.name}: ${reason}`);
+      console.warn(`[ai-fallback] ${provider.name}: ${reason}`);
+    }
+  }
+
+  logActivity('ai_error', 'Semua penyedia AI utama dan cadangan gagal');
+  await persist().catch(() => {});
+  const timedOut = failures.some(item => item.includes('timeout'));
+  return format(timedOut
+    ? 'Semua layanan AI terlalu lama merespons atau sedang sibuk. Coba lagi nanti atau ketik .menu.'
+    : 'Semua layanan AI sedang tidak tersedia. Coba lagi nanti atau ketik .menu.');
+}
+
 export async function testFreeAI() {
   const answer = await askFreeAI('Balas tepat: Koneksi AI DAFZZ aktif.', { requesterIp: 'admin-test' });
   const ok = Boolean(answer) && !isFallbackAIResponse(answer);
-  return { ok, answer, configuration: resolveAIConfiguration(getDb().settings) };
+  return { ok, answer, configuration: resolveAIConfiguration(getDb().settings), fallbackCount: FREE_FALLBACKS.length };
 }

@@ -386,6 +386,14 @@ app.get('/download/:token', async (req, res) => {
   } catch { return res.status(404).send('File hasil sudah tidak tersedia.'); }
 });
 
+app.get('/', async (req, res, next) => {
+  try {
+    const html = await fs.readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
+    const origin = publicOrigin(req);
+    res.type('html').send(html.replaceAll('__PUBLIC_ORIGIN__', origin));
+  } catch (error) { next(error); }
+});
+
 app.get('/admin', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')));
 app.get('/bot', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'bot.html')));
 app.get('/run/:token', (req, res) => {
