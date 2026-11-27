@@ -98,7 +98,7 @@ function renderOverview(data) {
     ? 'AI fallback dimatikan. Pesan yang tidak cocok tidak akan mendapat jawaban AI.'
     : ai.mode === 'custom'
       ? `Mode API manual aktif. API key ${ai.apiKeySet ? 'tersimpan di server' : 'belum diisi'}.`
-      : 'Mode otomatis: Pollinations lalu Kilo, LLM7, dan AI Horde sebagai cadangan gratis tanpa API key pengguna. Kuota dan waktu antre bisa berubah.';
+      : (ai.apiKeySet ? 'Mode otomatis: Pollinations memakai secret key server, dengan Kilo, LLM7, dan AI Horde sebagai cadangan. Kuota dan waktu antre dapat berubah.' : 'Mode otomatis: Pollinations menunggu secret key. Kilo, LLM7, dan AI Horde dicoba sebagai cadangan; ketersediaan tidak dijamin.');
 
   renderLogs(data.logs);
   $('lastRefresh').textContent = `Diperbarui ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} · pembaruan otomatis 15 detik`;

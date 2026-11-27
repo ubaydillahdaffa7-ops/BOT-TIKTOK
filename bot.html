@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#070d18">
-  <meta name="description" content="Dashboard DAFZZ untuk mengatur bot TikTok, Telegram, dan WhatsApp.">
-  <title>DAFZZ — Menu Bot TT</title>
+  <meta name="description" content="Pusat pengaturan bot DAFZZ untuk TikTok, WhatsApp, dan Telegram.">
+  <title>DAFZZ — Menu BOT</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/bot.css">
 </head>
@@ -17,39 +17,71 @@
     <div class="brand" aria-label="DAFZZ"><button class="brand-mark info-trigger" type="button" data-admin-info-trigger aria-label="Buka Info Admin" title="Info Admin">D</button><a class="brand-name" href="/">DAFZZ<span class="brand-blue">-TOOLS</span></a></div>
     <nav aria-label="Navigasi utama">
       <a class="config-nav-link menu-nav-link" href="/" aria-label="Tools" title="Tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 17.5 9.5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13 8 3 3"/></svg><span>Tools</span></a>
-      <a class="config-nav-link bot-nav-link" href="/bot" aria-label="Bot TT" title="Bot TT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>Bot TT</span></a>
+      <a class="config-nav-link bot-nav-link active" href="/bot" aria-label="BOT" title="BOT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>BOT</span></a>
       <a class="config-nav-link advanced-nav-link" href="/admin" aria-label="Lanjutan" title="Lanjutan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Lanjutan</span></a>
     </nav>
   </header>
-<dialog class="admin-info-dialog" id="adminInfoDialog" aria-labelledby="adminInfoTitle">
-  <div class="admin-info-card">
-    <div class="admin-info-head"><div><p class="eyebrow">DAFZZ / DEVELOPER INFORMATION</p><h2 id="adminInfoTitle">Info Admin</h2></div><button class="admin-info-close" type="button" data-admin-info-close aria-label="Tutup">×</button></div>
-    <div class="admin-info-owner"><span class="admin-info-avatar">D</span><div><small>OWNER</small><strong>𓆩 ᖽᐸɪղᘜ ༒ ᙃᴀ̷𝖿ᴢᴢ 𓆪</strong></div></div>
-    <div class="admin-info-block"><span>PROJECT</span><a href="https://portofolio-dafzz-stlr.onrender.com" target="_blank" rel="noopener noreferrer">portofolio-dafzz-stlr.onrender.com</a><a href="https://belajar-si-qjko.onrender.com" target="_blank" rel="noopener noreferrer">belajar-si-qjko.onrender.com</a></div>
-    <div class="admin-info-block"><span>LAPORAN BUG</span><a class="admin-info-report" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ubaydillahdaffa7%40gmail.com&amp;su=Laporan%20Bug%20DAFZZ-TOOLS" target="_blank" rel="noopener noreferrer"><strong>Laporkan bug via Gmail</strong><span>↗</span></a><small>Tujuan laporan: <a href="mailto:ubaydillahdaffa7@gmail.com">ubaydillahdaffa7@gmail.com</a></small></div>
-    <div class="admin-info-block"><span>TIKTOK DM</span><a href="https://www.tiktok.com/@.root_403_access" target="_blank" rel="noopener noreferrer">tiktok.com/@.root_403_access</a></div>
-    <p class="admin-info-foot">DAFZZ-TOOLS · ADMIN INFORMATION</p>
+  <div class="admin-info-dialog" id="adminInfoDialog" role="dialog" aria-modal="true" aria-labelledby="adminInfoTitle" tabindex="-1" hidden>
+    <div class="admin-info-card">
+      <div class="admin-info-head"><div><p class="eyebrow">DAFZZ / DEVELOPER INFORMATION</p><h2 id="adminInfoTitle">Info Admin</h2></div><button class="admin-info-close" type="button" data-admin-info-close aria-label="Tutup">×</button></div>
+      <div class="admin-info-owner"><span class="admin-info-avatar">D</span><div><small>OWNER</small><strong>𓆩 ᖽᐸɪղᘜ ༒ ᙃᴀ̷𝖿ᴢᴢ 𓆪</strong></div></div>
+      <div class="admin-info-block"><span>PROJECT</span><a href="https://portofolio-dafzz-stlr.onrender.com" target="_blank" rel="noopener noreferrer">portofolio-dafzz-stlr.onrender.com</a><a href="https://belajar-si-qjko.onrender.com" target="_blank" rel="noopener noreferrer">belajar-si-qjko.onrender.com</a></div>
+      <div class="admin-info-block"><span>LAPORAN BUG</span><a class="admin-info-report" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ubaydillahdaffa7%40gmail.com&amp;su=Laporan%20Bug%20DAFZZ-TOOLS" target="_blank" rel="noopener noreferrer"><strong>Laporkan bug via Gmail</strong><span>↗</span></a><small>Tujuan laporan: <a href="mailto:ubaydillahdaffa7@gmail.com">ubaydillahdaffa7@gmail.com</a></small></div>
+      <div class="admin-info-block"><span>TIKTOK DM</span><a href="https://www.tiktok.com/@.root_403_access" target="_blank" rel="noopener noreferrer">tiktok.com/@.root_403_access</a></div>
+      <p class="admin-info-foot">DAFZZ-TOOLS · ADMIN INFORMATION</p>
+    </div>
   </div>
-</dialog>
 
   <main class="container bot-container">
-    <section id="loginGate" class="bot-login-gate hidden">
+    <section class="bot-entry-hero scroll-reveal">
+      <div>
+        <p class="eyebrow"><span class="live-dot"></span> DAFZZ / MULTI-PLATFORM BOT <span class="eyebrow-rule"></span> 01 / 03</p>
+        <h1>Menu <span>BOT.</span></h1>
+        <p class="bot-entry-intro">Menu ini adalah pusat untuk membuat, menyambungkan, dan mengatur bot TikTok, WhatsApp, serta Telegram. Setiap aplikasi memiliki cara autentikasi, persyaratan, dan pengaturan yang berbeda. Pilih platform yang ingin kamu gunakan untuk melihat langkah khususnya.</p>
+        <div class="bot-hero-meta"><span class="meta-mark"></span><span>3 PLATFORM TERPISAH</span><i></i><span>PANDUAN SESUAI APLIKASI</span><i></i><span>PENGATURAN ADMIN AMAN</span></div>
+      </div>
+      <aside class="bot-entry-aside">
+        <span class="entry-aside-label">MULAI DI SINI</span>
+        <strong>Silakan pilih jenis bot</strong>
+        <p>Tekan salah satu platform di bawah. Setelah masuk dan login administrator, halaman akan membuka konfigurasi platform yang kamu pilih.</p>
+        <span class="entry-aside-line"></span>
+      </aside>
+    </section>
+
+    <section class="bot-section bot-platform-section scroll-reveal">
+      <div class="bot-section-heading"><div><p class="eyebrow">02 / PILIH PLATFORM</p><h2>Bot yang ingin dibuat</h2><p class="muted">Pilih satu. Panduan, data koneksi, dan tombolnya akan berbeda sesuai aplikasi.</p></div><span class="section-note">3 JENIS BOT</span></div>
+      <div class="bot-platform-grid">
+        <a class="bot-platform-card" href="/admin#platform=tiktok" aria-label="Pilih konfigurasi Bot TikTok">
+          <span class="bot-platform-id">01 / TIKTOK</span><span class="bot-platform-mark">TT</span><strong>Bot TikTok</strong>
+          <p>Menggunakan TikTok DM Bridge, sesi akun dari Chrome desktop, API token, dan webhook. Konektor yang tersedia memiliki batasan fitur.</p>
+          <span class="bot-platform-link">Pilih Bot TikTok <b aria-hidden="true">→</b></span>
+        </a>
+        <a class="bot-platform-card" href="/admin#platform=whatsapp" aria-label="Pilih konfigurasi Bot WhatsApp">
+          <span class="bot-platform-id">02 / WHATSAPP</span><span class="bot-platform-mark wa">WA</span><strong>Bot WhatsApp</strong>
+          <p>Menghubungkan nomor WhatsApp milikmu lewat kode tautan atau QR. Membutuhkan ponsel untuk menyetujui perangkat tertaut.</p>
+          <span class="bot-platform-link">Pilih Bot WhatsApp <b aria-hidden="true">→</b></span>
+        </a>
+        <a class="bot-platform-card" href="/admin#platform=telegram" aria-label="Pilih konfigurasi Bot Telegram">
+          <span class="bot-platform-id">03 / TELEGRAM</span><span class="bot-platform-mark tg">TG</span><strong>Bot Telegram</strong>
+          <p>Menggunakan token Bot API yang dibuat melalui BotFather. Tidak perlu menautkan akun pribadi dengan QR.</p>
+          <span class="bot-platform-link">Pilih Bot Telegram <b aria-hidden="true">→</b></span>
+        </a>
+      </div>
+      <p class="bot-selection-footnote">Penting: halaman konfigurasi meminta login administrator. Token, kode tautan, dan data sesi tidak ditampilkan di halaman pemilihan ini.</p>
+    </section>
+
+    <section id="loginGate" class="bot-login-gate">
       <p class="eyebrow">DAFZZ BOT / ADMIN ACCESS</p>
-      <h1>Masuk untuk membuka dashboard.</h1>
-      <p class="muted">Status bot, statistik pesan, konfigurasi AI, dan log aktivitas hanya ditampilkan kepada administrator.</p>
-      <a class="btn primary" href="/admin">Buka halaman administrator</a>
+      <h2>Masuk untuk mengelola bot</h2>
+      <p class="muted">Kamu bisa memilih platform di atas terlebih dahulu. Login administrator hanya diperlukan saat membuka pengaturan, menyimpan token, atau menautkan akun.</p>
+      <a class="btn primary" href="/admin#platform=tiktok">Masuk administrator</a>
     </section>
 
     <div id="dashboardContent" class="hidden">
-      <section class="bot-hero">
-        <div>
-          <p class="eyebrow"><span class="live-dot"></span> DAFZZ BOT / CONTROL CENTER <span class="eyebrow-rule"></span> 02 / 02</p>
-          <h1>Menu <span>Bot.</span></h1>
-          <p class="bot-intro">Pantau TikTok, Telegram, dan WhatsApp. Atur balasan otomatis, penggunaan AI, serta aktivitas bot dari satu tempat.</p>
-          <div class="bot-hero-meta"><span class="meta-mark"></span><span>401 ENTRI TERHUBUNG</span><i></i><span>7 KATEGORI</span><i></i><span>AI FALLBACK</span></div>
-        </div>
+      <section class="bot-hero bot-admin-hero scroll-reveal">
+        <div><p class="eyebrow"><span class="live-dot"></span> DAFZZ BOT / ADMIN DASHBOARD</p><h2>Ringkasan <span>BOT.</span></h2><p class="bot-intro">Ringkasan koneksi dan aktivitas akan tampil di sini setelah kamu masuk sebagai administrator.</p></div>
         <div class="bot-control-card">
-          <div class="bot-control-top"><span>BOT STATUS</span><span class="bot-signal" id="botSignal"></span></div>
+          <div class="bot-control-top"><span>STATUS BOT TIKTOK</span><span class="bot-signal" id="botSignal"></span></div>
           <strong id="botStatusText">MEMUAT STATUS</strong>
           <p id="botStatusNote">Mengambil status bot dari server.</p>
           <button class="btn primary bot-toggle" id="botToggle" type="button" disabled>Memuat...</button>
@@ -59,74 +91,42 @@
 
       <section class="bot-metrics" aria-label="Statistik bot">
         <article class="bot-metric"><span>PESAN DITERIMA</span><strong id="metricReceived">0</strong><small>Total pesan masuk diproses</small></article>
-        <article class="bot-metric"><span>BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons dikirim melalui bridge</small></article>
-        <article class="bot-metric"><span>BALASAN AI</span><strong id="metricAiReplies">0</strong><small>Fallback ke model AI</small></article>
+        <article class="bot-metric"><span>BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons lintas platform</small></article>
+        <article class="bot-metric"><span>BALASAN AI</span><strong id="metricAiReplies">0</strong><small>Jawaban fallback AI</small></article>
         <article class="bot-metric"><span>HASIL TERSIMPAN</span><strong id="metricOutputs">0</strong><small>File atau teks keluaran</small></article>
         <article class="bot-metric"><span>SESI TOOL AKTIF</span><strong id="metricSessions">0</strong><small>Sesi browser yang belum kedaluwarsa</small></article>
       </section>
 
-      <section class="bot-section bot-platform-section">
-        <div class="bot-section-heading"><div><p class="eyebrow">01 / BOT CONFIGURATION</p><h2>Pilih konfigurasi bot</h2><p class="muted">Tiap platform punya halaman pemasangan, status, dan panduan sendiri.</p></div><span class="section-note">3 PLATFORM</span></div>
-        <div class="bot-platform-grid">
-          <a class="bot-platform-card" href="/admin#platform=tiktok"><span class="bot-platform-id">01 / TIKTOK</span><span class="bot-platform-mark">TT</span><span class="platform-status-tag" id="menuTikTokStatus">MEMUAT STATUS</span><strong>Bot TikTok</strong><p>Atur DM Bridge, webhook, sesi akun, dan respons bot TikTok.</p><span class="bot-platform-link">Buka konfigurasi <b>→</b></span></a>
-          <a class="bot-platform-card" href="/admin#platform=telegram"><span class="bot-platform-id">02 / TELEGRAM</span><span class="bot-platform-mark tg">TG</span><span class="platform-status-tag" id="menuTelegramStatus">MEMUAT STATUS</span><strong>Bot Telegram</strong><p>Masukkan token BotFather, periksa koneksi, lalu aktifkan bot.</p><span class="bot-platform-link">Buka konfigurasi <b>→</b></span></a>
-          <a class="bot-platform-card" href="/admin#platform=whatsapp"><span class="bot-platform-id">03 / WHATSAPP</span><span class="bot-platform-mark wa">WA</span><span class="platform-status-tag" id="menuWhatsAppStatus">MEMUAT STATUS</span><strong>Bot WhatsApp</strong><p>Tautkan nomor melalui pairing code atau QR dan kelola sesi.</p><span class="bot-platform-link">Buka konfigurasi <b>→</b></span></a>
+      <section class="bot-section">
+        <div class="bot-section-heading"><div><p class="eyebrow">03 / STATUS PLATFORM</p><h2>Status koneksi</h2><p class="muted">Status terakhir dari platform yang telah dikonfigurasi.</p></div><button class="btn small-btn" id="refreshBtn" type="button">Perbarui status</button></div>
+        <div class="bot-platform-status-row">
+          <article><span>TIKTOK</span><strong id="menuTikTokStatus">MEMUAT STATUS</strong></article>
+          <article><span>WHATSAPP</span><strong id="menuWhatsAppStatus">MEMUAT STATUS</strong></article>
+          <article><span>TELEGRAM</span><strong id="menuTelegramStatus">MEMUAT STATUS</strong></article>
         </div>
       </section>
 
       <section class="bot-section">
-        <div class="bot-section-heading"><div><p class="eyebrow">02 / SYSTEM CONNECTIONS</p><h2>Koneksi dan penyimpanan</h2></div><button class="btn small-btn" id="refreshBtn" type="button">Perbarui status</button></div>
+        <div class="bot-section-heading"><div><p class="eyebrow">04 / SYSTEM CONNECTIONS</p><h2>Koneksi dan penyimpanan</h2></div></div>
         <div class="bot-card-grid">
-          <article class="bot-info-card">
-            <div class="bot-card-head"><span class="bot-card-index">A / 01</span><span class="state-pill" id="bridgePill">MEMUAT</span></div>
-            <h3>TikTok DM Bridge</h3>
-            <p id="bridgeNote">Memeriksa kesiapan bridge.</p>
-            <div class="bot-card-foot"><span>API BRIDGE</span><strong id="bridgeAddress">Belum diatur</strong></div>
-          </article>
-          <article class="bot-info-card">
-            <div class="bot-card-head"><span class="bot-card-index">A / 02</span><span class="state-pill" id="webhookPill">MEMUAT</span></div>
-            <h3>Webhook TikTok</h3>
-            <p>Jalur penerimaan event dari bridge menuju server DAFZZ.</p>
-            <div class="bot-card-foot"><span>ENDPOINT</span><strong id="webhookAddress">/webhooks/tiktok</strong></div>
-          </article>
-          <article class="bot-info-card">
-            <div class="bot-card-head"><span class="bot-card-index">A / 03</span><span class="state-pill good">PERSISTEN</span></div>
-            <h3>Penyimpanan sesi</h3>
-            <p id="storageNote">Data aplikasi disimpan pada volume privat server.</p>
-            <div class="bot-card-foot"><span>HASIL AKTIF</span><strong id="storedResults">0</strong></div>
-          </article>
-          <article class="bot-info-card ai-info-card">
-            <div class="bot-card-head"><span class="bot-card-index">A / 04</span><span class="state-pill" id="aiPill">MEMUAT</span></div>
-            <h3 id="aiProvider">Pollinations AI</h3>
-            <p id="aiNote">AI fallback digunakan saat perintah atau tools tidak cocok.</p>
-            <div class="bot-card-foot"><span>MODEL</span><strong id="aiModel">openai</strong></div>
-          </article>
+          <article class="bot-info-card"><div class="bot-card-head"><span class="bot-card-index">A / 01</span><span class="state-pill" id="bridgePill">MEMUAT</span></div><h3>TikTok DM Bridge</h3><p id="bridgeNote">Memeriksa kesiapan bridge.</p><div class="bot-card-foot"><span>API BRIDGE</span><strong id="bridgeAddress">Belum diatur</strong></div></article>
+          <article class="bot-info-card"><div class="bot-card-head"><span class="bot-card-index">A / 02</span><span class="state-pill" id="webhookPill">MEMUAT</span></div><h3>Webhook TikTok</h3><p>Jalur penerimaan event dari bridge menuju server DAFZZ.</p><div class="bot-card-foot"><span>ENDPOINT</span><strong id="webhookAddress">/webhooks/tiktok</strong></div></article>
+          <article class="bot-info-card"><div class="bot-card-head"><span class="bot-card-index">A / 03</span><span class="state-pill good">PERSISTEN*</span></div><h3>Penyimpanan sesi</h3><p id="storageNote">Data aplikasi disimpan pada volume privat server.</p><div class="bot-card-foot"><span>HASIL AKTIF</span><strong id="storedResults">0</strong></div></article>
+          <article class="bot-info-card ai-info-card"><div class="bot-card-head"><span class="bot-card-index">A / 04</span><span class="state-pill" id="aiPill">MEMUAT</span></div><h3 id="aiProvider">AI Provider</h3><p id="aiNote">AI fallback digunakan saat perintah atau tools tidak cocok.</p><div class="bot-card-foot"><span>MODEL</span><strong id="aiModel">openai</strong></div></article>
         </div>
+        <p class="bot-disclaimer">*Penyimpanan mengikuti kemampuan disk pada layanan hosting. Hosting gratis Render memakai filesystem sementara; sesi WhatsApp dan data lokal dapat hilang saat restart, sleep, atau deploy ulang.</p>
       </section>
 
       <section class="bot-section bot-bottom-grid">
-        <div class="activity-panel">
-          <div class="bot-section-heading"><div><p class="eyebrow">02 / LIVE ACTIVITY</p><h2>Log aktivitas</h2></div><span class="section-note">30 AKTIVITAS TERBARU</span></div>
-          <div id="activityList" class="activity-list"><div class="activity-empty">Belum ada aktivitas yang tercatat.</div></div>
-        </div>
-        <aside class="bot-shortcuts">
-          <p class="eyebrow">03 / QUICK ACCESS</p>
-          <h2>Pengaturan bot</h2>
-          <p class="muted">Atur token bridge, webhook, URL publik, mode AI, dan API key melalui panel administrator.</p>
-          <a class="btn primary" href="/admin">Buka konfigurasi</a>
-          <a class="btn" href="/">Kembali ke Menu Tools</a>
-          <div class="shortcut-rule"></div>
-          <span class="shortcut-label">PENYIMPANAN SERVER</span>
-          <strong>APP DATA / TIKTOK VOLUME</strong>
-          <small>Secret dan sesi tidak ditampilkan di dashboard.</small>
-        </aside>
+        <div class="activity-panel"><div class="bot-section-heading"><div><p class="eyebrow">05 / LIVE ACTIVITY</p><h2>Log aktivitas</h2></div><span class="section-note">30 AKTIVITAS TERBARU</span></div><div id="activityList" class="activity-list"><div class="activity-empty">Belum ada aktivitas yang tercatat.</div></div></div>
+        <aside class="bot-shortcuts"><p class="eyebrow">06 / QUICK ACCESS</p><h2>Pengaturan bot</h2><p class="muted">Pilih platform yang ingin diatur. Setiap panel memiliki data dan langkah pemasangan tersendiri.</p><a class="btn primary" href="/admin">Buka konfigurasi bot</a><a class="btn" href="/">Kembali ke Menu Tools</a><div class="shortcut-rule"></div><span class="shortcut-label">PENYIMPANAN SERVER</span><strong>APP DATA / TIKTOK VOLUME</strong><small>Secret dan sesi tidak ditampilkan di dashboard.</small></aside>
       </section>
-      <p class="bot-disclaimer">Kesiapan bridge menunjukkan endpoint bridge merespons, bukan jaminan sesi TikTok selalu aktif. Pengiriman dan penerimaan DM nyata tetap bergantung pada koneksi akun dan kondisi layanan TikTok.</p>
     </div>
   </main>
-  <footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-BOT TT</span></span><span>BOT CONTROL CENTER</span><span>© 2026</span></div></footer>
+  <footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-BOT</span></span><span>BOT CONTROL CENTER</span><span>© 2026</span></div></footer>
   <div id="botToast" class="toast" role="status"></div>
   <script src="/admin-info.js" defer></script>
   <script src="/bot-dashboard.js" defer></script>
+  <script src="/reveal.js" defer></script>
 </body>
 </html>

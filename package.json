@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check bot.js && node --check bot-commands.js && node --check ai.js && node --check connectors.js && node --check store.js && node --check security.js && node --check script.js && node --check admin.js && node --check admin-info.js && node --check bot-dashboard.js && node --check sw.js",
+    "check": "node --check server.js && node --check bot.js && node --check bot-commands.js && node --check ai.js && node --check connectors.js && node --check store.js && node --check security.js && node --check script.js && node --check admin.js && node --check admin-info.js && node --check bot-dashboard.js && node --check reveal.js && node --check sw.js",
     "test": "node --test"
   },
   "dependencies": {

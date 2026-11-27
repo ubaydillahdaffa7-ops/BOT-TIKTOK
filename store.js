@@ -13,9 +13,10 @@ const DEFAULTS = {
     botEnabled: true,
     aiEnabled: true,
     aiMode: 'pollinations',
-    aiEndpoint: 'https://text.pollinations.ai/openai',
-    aiModel: 'openai',
+    aiEndpoint: 'https://gen.pollinations.ai/v1/chat/completions',
+    aiModel: 'openai/gpt-5.4-nano',
     aiApiKey: '',
+    pollinationsApiKey: '',
     fallbackPrefix: 'Maaf kamu ngetik apa mpruy',
     publicBaseUrl: process.env.APP_PUBLIC_URL || '',
     telegramBotToken: '',
@@ -53,9 +54,10 @@ export async function initStore() {
     // configuration requested for this build. Custom mode is explicit.
     if (!stored.settings?.aiMode && String(stored.settings?.aiEndpoint || '').includes('ovh.endpoints')) {
       db.settings.aiMode = 'pollinations';
-      db.settings.aiEndpoint = 'https://text.pollinations.ai/openai';
-      db.settings.aiModel = 'openai';
+      db.settings.aiEndpoint = 'https://gen.pollinations.ai/v1/chat/completions';
+      db.settings.aiModel = 'openai/gpt-5.4-nano';
       db.settings.aiApiKey = '';
+      db.settings.pollinationsApiKey = ''; 
     }
     if (!['pollinations', 'custom'].includes(db.settings.aiMode)) db.settings.aiMode = 'pollinations';
   } catch (error) {

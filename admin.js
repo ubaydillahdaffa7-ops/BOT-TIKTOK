@@ -41,22 +41,38 @@ function setPill(id, label, state) {
   pill.className = `status-pill${state ? ` ${state}` : ''}`;
 }
 
-function selectPlatform(platform) {
+const VALID_PLATFORMS = new Set(['tiktok', 'whatsapp', 'telegram']);
+function readRequestedPlatform() {
+  const requested = new URLSearchParams(location.hash.replace(/^#/, '')).get('platform');
+  return VALID_PLATFORMS.has(requested) ? requested : 'tiktok';
+}
+
+function selectPlatform(platform, options = {}) {
+  if (!VALID_PLATFORMS.has(platform)) return;
   document.querySelectorAll('[data-platform-nav]').forEach(button => {
     const active = button.dataset.platformNav === platform;
     button.classList.toggle('active', active);
     button.setAttribute('aria-selected', String(active));
+    button.tabIndex = active ? 0 : -1;
   });
   document.querySelectorAll('[data-platform-panel]').forEach(panel => {
     panel.classList.toggle('hidden', panel.dataset.platformPanel !== platform);
+    panel.setAttribute('aria-hidden', String(panel.dataset.platformPanel !== platform));
   });
   const panel = document.querySelector(`[data-platform-panel="${platform}"]`);
-  if (location.hash !== `#platform=${platform}`) history.replaceState(null, '', `#platform=${platform}`);
-  panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (options.updateHash !== false && location.hash !== `#platform=${platform}`) {
+    history.replaceState(null, '', `${location.pathname}${location.search}#platform=${platform}`);
+  }
+  if (options.scroll !== false && panel && !$('dashboard').classList.contains('hidden')) {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 document.querySelectorAll('[data-platform-nav]').forEach(button => {
   button.addEventListener('click', () => selectPlatform(button.dataset.platformNav));
+});
+window.addEventListener('hashchange', () => {
+  if (!$('dashboard').classList.contains('hidden')) selectPlatform(readRequestedPlatform(), { updateHash: false });
 });
 
 function updateRiskProgress() {
@@ -180,6 +196,8 @@ async function loadOverview() {
   $('aiModel').value = s.aiModel || '';
   $('aiApiKey').value = '';
   $('clearAiApiKey').checked = false;
+  $('pollinationsApiKey').value = '';
+  $('clearPollinationsApiKey').checked = false;
   setAIFields();
   $('fallbackPrefix').value = s.fallbackPrefix || '';
   $('webhookUrl').textContent = `${location.host}/webhooks/tiktok`;
@@ -220,8 +238,7 @@ async function refreshState() {
   hide('authPanel'); show('dashboard');
   await loadOverview();
   await refreshPlatformStates().catch(error => console.warn('[platform-status]', error.message));
-  const requestedPlatform = new URLSearchParams(location.hash.replace(/^#/, '')).get('platform');
-  if (['tiktok', 'telegram', 'whatsapp'].includes(requestedPlatform)) selectPlatform(requestedPlatform);
+  selectPlatform(readRequestedPlatform(), { updateHash: false, scroll: false });
 }
 
 async function saveTikTokSettings(body) {
@@ -231,6 +248,8 @@ async function saveTikTokSettings(body) {
     $('webhookSecret').value = '';
     $('aiApiKey').value = '';
     $('clearAiApiKey').checked = false;
+    $('pollinationsApiKey').value = '';
+    $('clearPollinationsApiKey').checked = false;
     $('clearBridgeToken').checked = false;
     $('clearWebhookSecret').checked = false;
     setStatus('settingsStatus', 'Konfigurasi TikTok berhasil disimpan di server.');
@@ -270,6 +289,8 @@ $('settingsForm').addEventListener('submit', event => {
     aiModel: $('aiModel').value.trim(),
     aiApiKey: $('aiApiKey').value,
     clearAiApiKey: $('clearAiApiKey').checked,
+    pollinationsApiKey: $('pollinationsApiKey').value,
+    clearPollinationsApiKey: $('clearPollinationsApiKey').checked,
     fallbackPrefix: $('fallbackPrefix').value.trim()
   };
   const needsAcknowledgement = body.botEnabled && !platformState.tiktok?.riskAcceptedAt;

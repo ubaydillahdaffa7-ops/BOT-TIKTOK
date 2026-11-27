@@ -33,12 +33,12 @@
     <button data-gohome="categories"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Kategori</button>
     <button data-gohome="popular"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>Populer</button>
     <a class="config-nav-link menu-nav-link" href="/" aria-label="Tools" title="Tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 17.5 9.5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13 8 3 3"/></svg><span>Tools</span></a>
-    <a class="config-nav-link bot-nav-link" href="/bot" aria-label="Bot TT" title="Bot TT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>Bot TT</span></a>
+    <a class="config-nav-link bot-nav-link" href="/bot" aria-label="BOT" title="BOT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>BOT</span></a>
     <a class="config-nav-link advanced-nav-link" href="/admin" aria-label="Lanjutan" title="Lanjutan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Lanjutan</span></a>
   </nav>
   <button id="themeBtn" class="icon-btn" aria-label="Ganti tema" title="Ganti tema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/></svg></button>
 </header>
-<dialog class="admin-info-dialog" id="adminInfoDialog" aria-labelledby="adminInfoTitle">
+<div class="admin-info-dialog" id="adminInfoDialog" role="dialog" aria-modal="true" aria-labelledby="adminInfoTitle" tabindex="-1" hidden>
   <div class="admin-info-card">
     <div class="admin-info-head"><div><p class="eyebrow">DAFZZ / DEVELOPER INFORMATION</p><h2 id="adminInfoTitle">Info Admin</h2></div><button class="admin-info-close" type="button" data-admin-info-close aria-label="Tutup">×</button></div>
     <div class="admin-info-owner"><span class="admin-info-avatar">D</span><div><small>OWNER</small><strong>𓆩 ᖽᐸɪղᘜ ༒ ᙃᴀ̷𝖿ᴢᴢ 𓆪</strong></div></div>
@@ -47,7 +47,7 @@
     <div class="admin-info-block"><span>TIKTOK DM</span><a href="https://www.tiktok.com/@.root_403_access" target="_blank" rel="noopener noreferrer">tiktok.com/@.root_403_access</a></div>
     <p class="admin-info-foot">DAFZZ-TOOLS · ADMIN INFORMATION</p>
   </div>
-</dialog>
+</div>
 <main class="container">
 <section id="homeView" class="hero">
   <div class="hero-copy">
@@ -121,6 +121,7 @@
 <footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-TOOLS</span></span><span>TOOLS FOR EVERYDAY DIGITAL WORK</span><span>© 2026</span></div><div class="footer-bottom"><span>BUILT FOR THE BROWSER</span><span>DESIGNED TO BE USEFUL</span></div></footer>
 <div id="toast" class="toast" role="status"></div>
 <script src="admin-info.js" defer></script>
+<script src="reveal.js" defer></script>
 <script src="script.js"></script>
 </body>
 </html>

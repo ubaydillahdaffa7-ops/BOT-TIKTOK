@@ -1,13 +1,13 @@
 # DAFZZ Multi-Platform Bot
 
-Paket gabungan DAFZZ-TOOLS, backend bot TikTok, Telegram, WhatsApp, panel konfigurasi, halaman pemrosesan file, dan halaman unduhan.
+Paket gabungan DAFZZ-TOOLS, backend bot TikTok, WhatsApp, Telegram, panel konfigurasi, halaman pemrosesan file, dan halaman unduhan.
 
 ## Isi paket
 
 - file frontend di folder utama berisi website DAFZZ-TOOLS dari sumber pengguna, dengan tema dan navigasi aslinya tetap dipakai.
 - `tools.json` adalah katalog sumber: 401 entri. Enam kategori lama tetap memiliki 50 tools per kategori; kategori ke-7 berisi 1 Chat AI unggulan, 50 AI/Local Tools, dan 50 Bot Commands.
-- `admin.html`, `admin.css`, dan `admin.js` adalah panel konfigurasi bergaya DAFZZ dengan tiga menu terpisah: TikTok, Telegram, dan WhatsApp.
-- `bot.html`, `bot.css`, dan `bot-dashboard.js` menyediakan dashboard Menu Bot dengan status TikTok, Telegram, WhatsApp, statistik, penyimpanan, AI, dan log aktivitas.
+- `admin.html`, `admin.css`, dan `admin.js` adalah panel konfigurasi bergaya DAFZZ dengan tiga menu terpisah: TikTok, WhatsApp, dan Telegram.
+- `bot.html`, `bot.css`, dan `bot-dashboard.js` menyediakan dashboard Menu Bot dengan status TikTok, WhatsApp, Telegram, statistik, penyimpanan, AI, dan log aktivitas.
 - `bot-commands.js` menyimpan kode 50 Bot Commands tambahan serta handler chat untuk seluruh 25 AI Tools dan 25 Local Tools baru.
 - file `server.js`, `bot.js`, `connectors.js`, `store.js`, `security.js`, `ai.js` berisi backend bersama, webhook TikTok, polling Telegram, konektor WhatsApp Baileys, penyimpanan, dan AI fallback. `admin-info.js` mengaktifkan panel Info Admin pada ikon D.
 - `docker-compose.yml` menjalankan aplikasi DAFZZ dan TikTok DM bridge dalam jaringan privat.
@@ -142,9 +142,9 @@ Jangan pernah menempelkan `inbox.fetch`, `socket.fetch`, API token, webhook secr
 
 Sistem ini tidak membuat alur tanya-jawab berbeda untuk setiap parameter secara otomatis. Website sumber tetap meminta input melalui kontrolnya sendiri, termasuk unggahan file, ukuran, teks, pilihan, dan parameter lain. Validasi tiap tool mengikuti implementasi aslinya.
 
-## AI otomatis Pollinations dan tiga cadangan gratis
+## AI otomatis Pollinations dan tiga layanan cadangan
 
-Mode otomatis memakai endpoint legacy Pollinations yang saat ini dipakai website DAFZZ. Jika gagal, server mencoba secara berurutan:
+Mode otomatis memakai API Chat Completions Pollinations saat ini. Endpoint `https://gen.pollinations.ai/v1/chat/completions` dan model `openai/gpt-5.4-nano` memerlukan secret key server berawalan `sk_`. Isi key melalui `/admin` pada pengaturan AI, atau gunakan environment variable `POLLINATIONS_API_KEY`. Permintaan menggunakan anggaran/izin yang melekat pada key tersebut; periksa batas pemakaian pada akun Pollinations sebelum digunakan. Jika key belum tersedia, Pollinations dilewati dan server mencoba layanan cadangan berikut:
 
 1. Kilo AI Gateway `kilo-auto/free` — model gratis yang dapat digunakan tanpa API key milik pengguna.
 2. LLM7 — akses anonim tanpa token; ketersediaan model dan batas keyless dapat berubah.
@@ -152,7 +152,7 @@ Mode otomatis memakai endpoint legacy Pollinations yang saat ini dipakai website
 
 Perintah chat: `.ai pertanyaan kamu`. AI juga menjadi fallback untuk pesan yang bukan perintah. Tidak ada gateway gratis yang menjamin selalu online atau tidak berubah. Jangan kirim password, OTP, token, cookie, atau data rahasia ke AI pihak ketiga. Kilo memperingatkan bahwa rute gratis dapat menggunakan provider hulu yang menyimpan prompt atau hasil.
 
-Panel `/admin` juga menyediakan mode AI manual untuk endpoint OpenAI-compatible, nama model, dan API key milik pengguna. Key manual disimpan hanya di server. Endpoint utama Pollinations: `https://text.pollinations.ai/openai`, alias model `openai`. Pollinations juga telah menyediakan dokumentasi API generasi baru yang menggunakan autentikasi; bila endpoint legacy berubah, atur endpoint/model/key sesuai dokumentasi terbaru. Dokumentasi: https://gen.pollinations.ai/docs.
+Panel `/admin` juga menyediakan mode AI manual untuk endpoint OpenAI-compatible, nama model, dan API key milik pengguna. Key Pollinations dan key manual disimpan hanya di server; nilai secret tidak dikirim kembali ke browser. Dokumentasi resmi Pollinations: https://gen.pollinations.ai/docs. Secret key disimpan di server, jangan letakkan di file frontend atau commit ke repository. API generation Pollinations memerlukan secret key; jangan menganggap layanan ini tanpa key.
 
 ## Koneksi Telegram dan WhatsApp
 
@@ -185,7 +185,7 @@ Untuk menjalankan Node service, atur build command `npm install` dan start comma
 
 Katalog berisi 401 entri dalam tujuh kategori: 300 tools lama tetap dipertahankan, sedangkan kategori ke-7 berisi Chat AI, 50 AI/Local Tools, dan 50 Bot Commands. Ini bukan berarti setiap fungsi identik dengan layanan desktop profesional. Website sumber sudah mencantumkan batasan untuk beberapa fitur: editor hapus objek/latar bersifat manual, annotasi bukan OCR, analisis dimensi foto bukan pengenalan wajah, beberapa layanan web memerlukan internet dan dapat terkena CORS, serta ekspor dokumen bisa berupa ekspor teks sederhana yang tidak mempertahankan seluruh tata letak. Beberapa library PDF/DOCX/XLSX dimuat dari CDN saat pertama digunakan.
 
-Laporan pemeriksaan teknis ada di `QA-REPORT.txt`. Pengujian integrasi langsung dengan akun TikTok, Telegram, dan WhatsApp belum dilakukan karena memerlukan token/sesi akun pemiliknya.
+Laporan pemeriksaan teknis ada di `QA-REPORT.txt`. Pengujian integrasi langsung dengan akun TikTok, WhatsApp, dan Telegram belum dilakukan karena memerlukan token/sesi akun pemiliknya.
 
 
 ## STRUKTUR ARSIP

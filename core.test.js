@@ -183,6 +183,7 @@ test('the .ai command is routed through the shared dispatcher for Telegram and W
     whatsapp: { ...settings.platforms.whatsapp },
     aiEnabled: settings.aiEnabled,
     aiMode: settings.aiMode,
+    pollinationsApiKey: settings.pollinationsApiKey,
     fallbackPrefix: settings.fallbackPrefix
   };
   const previousFetch = globalThis.fetch;
@@ -191,8 +192,9 @@ test('the .ai command is routed through the shared dispatcher for Telegram and W
   settings.platforms.whatsapp.enabled = true;
   settings.aiEnabled = true;
   settings.aiMode = 'pollinations';
+  settings.pollinationsApiKey = 'sk_test-pollinations';
   globalThis.fetch = async url => {
-    assert.equal(String(url), 'https://text.pollinations.ai/openai');
+    assert.equal(String(url), 'https://gen.pollinations.ai/v1/chat/completions');
     return new Response(JSON.stringify({ choices: [{ message: { content: 'Jawaban AI DAFZZ untuk chat ini.' } }] }), {
       status: 200, headers: { 'Content-Type': 'application/json' }
     });
@@ -217,6 +219,7 @@ test('the .ai command is routed through the shared dispatcher for Telegram and W
     settings.platforms.whatsapp = previous.whatsapp;
     settings.aiEnabled = previous.aiEnabled;
     settings.aiMode = previous.aiMode;
+    settings.pollinationsApiKey = previous.pollinationsApiKey;
     settings.fallbackPrefix = previous.fallbackPrefix;
     delete getDb().processedEvents['qa:telegram:ai'];
     delete getDb().processedEvents['qa:whatsapp:ai'];
@@ -230,6 +233,14 @@ test('the configuration UI has three bot menus, five separate Paham acknowledgem
   const home = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
   const bot = fs.readFileSync(new URL('./bot.html', import.meta.url), 'utf8');
   const adminJs = fs.readFileSync(new URL('./admin.js', import.meta.url), 'utf8');
+  const infoJs = fs.readFileSync(new URL('./admin-info.js', import.meta.url), 'utf8');
+  const botDashboardStart = bot.indexOf('<div id="dashboardContent"');
+  assert.ok(bot.indexOf('class="bot-platform-grid"') < botDashboardStart, 'the three-platform picker must be public and visible before admin login');
+  for (const platform of ['tiktok', 'whatsapp', 'telegram']) assert.match(bot, new RegExp(`/admin#platform=${platform}`));
+  assert.match(bot, /Menu <span>BOT\.<\/span>/);
+  assert.doesNotMatch(bot, /Bot TT|DAFZZ-BOT TT/);
+  assert.match(infoJs, /dialog\.hidden = false/);
+  assert.match(infoJs, /dialog\.classList\.add\('is-open'\)/);
   assert.equal((admin.match(/<button class="platform-choice/g) || []).length, 3);
   assert.equal((admin.match(/class="risk-item"/g) || []).length, 5);
   assert.equal((admin.match(/class="risk-ack"/g) || []).length, 5);
@@ -283,12 +294,14 @@ test('admin URL validator accepts only HTTP and HTTPS URLs', () => {
 });
 
 
-test('Pollinations automatic AI uses the tested endpoint and alias without a key', () => {
-  const config = resolveAIConfiguration({ aiMode: 'pollinations', aiEndpoint: 'https://wrong.example', aiModel: 'wrong', aiApiKey: 'must-not-be-used' });
+test('Pollinations automatic AI uses its current endpoint, model, and separate secret key', () => {
+  const config = resolveAIConfiguration({ aiMode: 'pollinations', aiEndpoint: 'https://wrong.example', aiModel: 'wrong', aiApiKey: 'manual-key', pollinationsApiKey: 'sk_test-pollinations' });
   assert.equal(config.mode, 'pollinations');
-  assert.equal(config.endpoint, 'https://text.pollinations.ai/openai');
-  assert.equal(config.model, 'openai');
-  assert.equal(config.apiKey, '');
+  assert.equal(config.endpoint, 'https://gen.pollinations.ai/v1/chat/completions');
+  assert.equal(config.model, 'openai/gpt-5.4-nano');
+  assert.equal(config.apiKey, 'sk_test-pollinations');
+  const invalid = resolveAIConfiguration({ aiMode: 'pollinations', pollinationsApiKey: 'pk_not-a-secret-key' });
+  assert.equal(invalid.apiKey, '');
 });
 
 test('manual AI mode keeps the administrator endpoint, model, and key', () => {
@@ -300,12 +313,12 @@ test('manual AI mode keeps the administrator endpoint, model, and key', () => {
 });
 
 
-test('Pollinations fallback sends a POST with the tested alias and no API key', async () => {
+test('Pollinations sends the current authenticated Chat Completions request', async () => {
   const settings = getDb().settings;
   const previousSettings = { ...settings };
   const previousFetch = globalThis.fetch;
   let captured;
-  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', fallbackPrefix: 'DAFZZ:' });
+  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', pollinationsApiKey: 'sk_test-pollinations', fallbackPrefix: 'DAFZZ:' });
   globalThis.fetch = async (url, options) => {
     captured = { url: String(url), options };
     return new Response(JSON.stringify({ choices: [{ message: { content: 'Koneksi AI aktif.' } }] }), {
@@ -314,14 +327,41 @@ test('Pollinations fallback sends a POST with the tested alias and no API key', 
   };
   try {
     const answer = await askFreeAI('Uji koneksi');
-    assert.equal(captured.url, 'https://text.pollinations.ai/openai');
+    assert.equal(captured.url, 'https://gen.pollinations.ai/v1/chat/completions');
     assert.equal(captured.options.method, 'POST');
-    assert.equal(captured.options.headers.Authorization, undefined);
-    assert.equal(JSON.parse(captured.options.body).model, 'openai');
+    assert.equal(captured.options.headers.Authorization, 'Bearer sk_test-pollinations');
+    assert.equal(JSON.parse(captured.options.body).model, 'openai/gpt-5.4-nano');
     assert.match(answer, /Koneksi AI aktif/);
   } finally {
     globalThis.fetch = previousFetch;
     Object.assign(settings, previousSettings);
+  }
+});
+
+test('Pollinations is skipped when no secret key is configured', async () => {
+  const settings = getDb().settings;
+  const previousSettings = { ...settings };
+  const previousFetch = globalThis.fetch;
+  const previousEnv = process.env.POLLINATIONS_API_KEY;
+  delete process.env.POLLINATIONS_API_KEY;
+  const attempted = [];
+  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', pollinationsApiKey: '', fallbackPrefix: 'DAFZZ:' });
+  globalThis.fetch = async (url) => {
+    attempted.push(String(url));
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Cadangan AI aktif.' } }] }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  try {
+    const answer = await askFreeAI('Uji fallback tanpa key Pollinations');
+    assert.equal(attempted[0], 'https://ai-gateway.kilo.ai/api/v1/chat/completions');
+    assert.doesNotMatch(attempted.join(' '), /gen\.pollinations\.ai/);
+    assert.match(answer, /Cadangan AI aktif/);
+  } finally {
+    globalThis.fetch = previousFetch;
+    Object.assign(settings, previousSettings);
+    if (previousEnv === undefined) delete process.env.POLLINATIONS_API_KEY;
+    else process.env.POLLINATIONS_API_KEY = previousEnv;
   }
 });
 
@@ -362,7 +402,7 @@ test('automatic AI tries three anonymous backup gateways after Pollinations fail
   const previousFetch = globalThis.fetch;
   const attempted = [];
   const attemptedOptions = [];
-  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', fallbackPrefix: 'DAFZZ:' });
+  Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', pollinationsApiKey: 'sk_test-pollinations', fallbackPrefix: 'DAFZZ:' });
   globalThis.fetch = async (url, options = {}) => {
     const address = String(url);
     attempted.push(address);
@@ -389,12 +429,13 @@ test('automatic AI tries three anonymous backup gateways after Pollinations fail
   };
   try {
     const answer = await askFreeAI('Uji failover AI');
-    assert.equal(attempted[0], 'https://text.pollinations.ai/openai');
+    assert.equal(attempted[0], 'https://gen.pollinations.ai/v1/chat/completions');
     assert.equal(attempted[1], 'https://ai-gateway.kilo.ai/api/v1/chat/completions');
     assert.equal(attempted[2], 'https://api.llm7.io/v1/models');
     assert.equal(attempted[3], 'https://api.llm7.io/v1/chat/completions');
     assert.equal(attempted[4], 'https://oai.aihorde.net/v1/models');
     assert.equal(attempted[5], 'https://oai.aihorde.net/v1/chat/completions');
+    assert.equal(attemptedOptions[0].headers?.Authorization, 'Bearer sk_test-pollinations');
     assert.equal(attemptedOptions[1].headers?.Authorization, undefined);
     assert.equal(attemptedOptions[3].headers?.Authorization, undefined);
     assert.equal(attemptedOptions[5].headers?.Authorization, 'Bearer 0000000000');

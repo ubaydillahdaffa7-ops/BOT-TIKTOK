@@ -16,21 +16,21 @@
     <div class="brand" aria-label="DAFZZ"><button class="brand-mark info-trigger" type="button" data-admin-info-trigger aria-label="Buka Info Admin" title="Info Admin">D</button><a class="brand-name" href="/">DAFZZ<span class="brand-blue">-TOOLS</span></a></div>
     <nav aria-label="Navigasi utama">
       <a class="config-nav-link menu-nav-link" href="/" aria-label="Tools" title="Tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 17.5 9.5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13 8 3 3"/></svg><span>Tools</span></a>
-      <a class="config-nav-link bot-nav-link" href="/bot" aria-label="Bot TT" title="Bot TT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>Bot TT</span></a>
+      <a class="config-nav-link bot-nav-link" href="/bot" aria-label="BOT" title="BOT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>BOT</span></a>
       <a class="config-nav-link advanced-nav-link" href="/admin" aria-label="Lanjutan" title="Lanjutan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Lanjutan</span></a>
     </nav>
     <span class="admin-mark">BOT CONTROL</span>
   </header>
-<dialog class="admin-info-dialog" id="adminInfoDialog" aria-labelledby="adminInfoTitle">
+<div class="admin-info-dialog" id="adminInfoDialog" role="dialog" aria-modal="true" aria-labelledby="adminInfoTitle" tabindex="-1" hidden>
   <div class="admin-info-card">
     <div class="admin-info-head"><div><p class="eyebrow">DAFZZ / DEVELOPER INFORMATION</p><h2 id="adminInfoTitle">Info Admin</h2></div><button class="admin-info-close" type="button" data-admin-info-close aria-label="Tutup">×</button></div>
     <div class="admin-info-owner"><span class="admin-info-avatar">D</span><div><small>OWNER</small><strong>𓆩 ᖽᐸɪղᘜ ༒ ᙃᴀ̷𝖿ᴢᴢ 𓆪</strong></div></div>
     <div class="admin-info-block"><span>PROJECT</span><a href="https://portofolio-dafzz-stlr.onrender.com" target="_blank" rel="noopener noreferrer">portofolio-dafzz-stlr.onrender.com</a><a href="https://belajar-si-qjko.onrender.com" target="_blank" rel="noopener noreferrer">belajar-si-qjko.onrender.com</a></div>
-    <div class="admin-info-block"><span>LAPORAN BUG</span><a class="admin-info-report" href="mailto:ubaydillahdaffa7@gmail.com?subject=Laporan%20Bug%20DAFZZ-TOOLS"><strong>Laporkan bug via Gmail</strong><span>↗</span></a><small>Tujuan laporan: ubaydillahdaffa7@gmail.com</small></div>
+    <div class="admin-info-block"><span>LAPORAN BUG</span><a class="admin-info-report" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ubaydillahdaffa7%40gmail.com&amp;su=Laporan%20Bug%20DAFZZ-TOOLS" target="_blank" rel="noopener noreferrer"><strong>Laporkan bug via Gmail</strong><span>↗</span></a><small>Tujuan laporan: ubaydillahdaffa7@gmail.com</small></div>
     <div class="admin-info-block"><span>TIKTOK DM</span><a href="https://www.tiktok.com/@.root_403_access" target="_blank" rel="noopener noreferrer">tiktok.com/@.root_403_access</a></div>
     <p class="admin-info-foot">DAFZZ-TOOLS · ADMIN INFORMATION</p>
   </div>
-</dialog>
+</div>
   <main class="container admin-container">
     <section id="authPanel" class="auth-panel hidden">
       <p class="eyebrow">DAFZZ CONTROL PANEL</p>
@@ -74,11 +74,11 @@
           <button class="platform-choice active" type="button" data-platform-nav="tiktok" aria-controls="tiktokPanel" aria-selected="true">
             <span class="platform-symbol tiktok-symbol">TT</span><span class="platform-choice-copy"><strong>Bot TikTok</strong><small>DM Bridge · sesi akun</small></span><span class="platform-choice-arrow">01 / 03</span>
           </button>
-          <button class="platform-choice" type="button" data-platform-nav="telegram" aria-controls="telegramPanel" aria-selected="false">
-            <span class="platform-symbol telegram-symbol">TG</span><span class="platform-choice-copy"><strong>Bot Telegram</strong><small>Bot API · token</small></span><span class="platform-choice-arrow">02 / 03</span>
-          </button>
           <button class="platform-choice" type="button" data-platform-nav="whatsapp" aria-controls="whatsappPanel" aria-selected="false">
-            <span class="platform-symbol whatsapp-symbol">WA</span><span class="platform-choice-copy"><strong>Bot WhatsApp</strong><small>Pairing nomor · sesi</small></span><span class="platform-choice-arrow">03 / 03</span>
+            <span class="platform-symbol whatsapp-symbol">WA</span><span class="platform-choice-copy"><strong>Bot WhatsApp</strong><small>Pairing nomor · sesi</small></span><span class="platform-choice-arrow">02 / 03</span>
+          </button>
+          <button class="platform-choice" type="button" data-platform-nav="telegram" aria-controls="telegramPanel" aria-selected="false">
+            <span class="platform-symbol telegram-symbol">TG</span><span class="platform-choice-copy"><strong>Bot Telegram</strong><small>Bot API · token</small></span><span class="platform-choice-arrow">03 / 03</span>
           </button>
         </div>
       </section>
@@ -128,11 +128,19 @@
           <div class="control">
             <label class="control-label" for="aiMode">Mode AI</label>
             <select class="field" id="aiMode">
-              <option value="pollinations">Pollinations AI otomatis — tanpa API key</option>
+              <option value="pollinations">Otomatis — Pollinations + layanan cadangan</option>
               <option value="custom">AI manual — API key sendiri</option>
             </select>
           </div>
-          <div id="pollinationsInfo" class="inline-note">Urutan otomatis: Pollinations, Kilo Gateway (model gratis), LLM7 anonim, lalu AI Horde anonim. Tidak memerlukan API key milikmu. Setiap layanan punya kuota dan antrean sendiri; AI Horde bisa menunggu lama karena memakai komputer relawan.</div>
+          <div id="pollinationsInfo">
+            <div class="inline-note">Pollinations sekarang memerlukan secret key server (awalan <code>sk_</code>). Bila key belum diisi, sistem melewati Pollinations dan mencoba Kilo, LLM7, lalu AI Horde sebagai cadangan. Layanan cadangan dapat berubah, dibatasi kuota, atau tidak tersedia.</div>
+            <div class="control">
+              <label class="control-label" for="pollinationsApiKey">Secret key Pollinations (sk_, opsional)</label>
+              <input class="field" id="pollinationsApiKey" type="password" autocomplete="new-password" placeholder="Tempel secret key Pollinations di sini">
+              <label class="check-row"><input type="checkbox" id="clearPollinationsApiKey"> Hapus secret key Pollinations tersimpan</label>
+              <small class="muted">Key disimpan di server, tidak dikirim ke browser pengunjung. Bisa juga disetel melalui environment variable POLLINATIONS_API_KEY.</small>
+            </div>
+          </div>
           <div id="aiCustomFields" class="hidden">
             <div class="control">
               <label class="control-label" for="aiEndpoint">Endpoint OpenAI-compatible</label>
@@ -232,6 +240,7 @@
     <div class="footer">DAFZZ BOT <span>·</span> CONTROL PANEL</div>
   </main>
   <script src="/admin-info.js" defer></script>
+  <script src="/reveal.js" defer></script>
   <script src="/admin.js" defer></script>
 </body>
 </html>

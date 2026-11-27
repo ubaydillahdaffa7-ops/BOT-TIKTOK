@@ -226,6 +226,7 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
       riskAcceptedAt: db.settings.platforms?.whatsapp?.riskAcceptedAt || null
     }
   };
+  const pollinationsKeySet = String(db.settings.pollinationsApiKey || process.env.POLLINATIONS_API_KEY || '').trim().startsWith('sk_');
   res.json({
     catalog,
     platforms,
@@ -236,10 +237,10 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
     ai: {
       enabled: db.settings.aiEnabled,
       mode: aiMode,
-      provider: aiMode === 'pollinations' ? 'Pollinations → Kilo → LLM7 → AI Horde' : 'Custom API → Kilo → LLM7 → AI Horde',
-      endpoint: aiMode === 'pollinations' ? 'https://text.pollinations.ai/openai' : db.settings.aiEndpoint,
-      model: aiMode === 'pollinations' ? 'openai / automatic fallback' : db.settings.aiModel,
-      apiKeySet: Boolean(db.settings.aiApiKey)
+      provider: aiMode === 'pollinations' ? (pollinationsKeySet ? 'Pollinations → Kilo → LLM7 → AI Horde' : 'Kilo → LLM7 → AI Horde (Pollinations menunggu secret key)') : 'Custom API → Kilo → LLM7 → AI Horde',
+      endpoint: aiMode === 'pollinations' ? 'https://gen.pollinations.ai/v1/chat/completions' : db.settings.aiEndpoint,
+      model: aiMode === 'pollinations' ? 'openai/gpt-5.4-nano' : db.settings.aiModel,
+      apiKeySet: aiMode === 'pollinations' ? pollinationsKeySet : Boolean(db.settings.aiApiKey)
     },
     logs: Array.isArray(db.logs) ? db.logs.slice(0, 30) : [],
     settings: {
@@ -249,9 +250,10 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
       botEnabled: db.settings.botEnabled !== false,
       aiEnabled: db.settings.aiEnabled,
       aiMode,
-      aiEndpoint: aiMode === 'pollinations' ? 'https://text.pollinations.ai/openai' : db.settings.aiEndpoint,
-      aiModel: aiMode === 'pollinations' ? 'openai' : db.settings.aiModel,
+      aiEndpoint: aiMode === 'pollinations' ? 'https://gen.pollinations.ai/v1/chat/completions' : db.settings.aiEndpoint,
+      aiModel: aiMode === 'pollinations' ? 'openai/gpt-5.4-nano' : db.settings.aiModel,
       aiApiKeySet: Boolean(db.settings.aiApiKey),
+      pollinationsApiKeySet: pollinationsKeySet,
       fallbackPrefix: db.settings.fallbackPrefix,
       publicBaseUrl: db.settings.publicBaseUrl
     }
@@ -278,9 +280,8 @@ app.post('/api/admin/settings', requireAdmin, ensureCsrf, async (req, res) => {
   if (typeof body.aiEnabled === 'boolean') settings.aiEnabled = body.aiEnabled;
   if (body.aiMode === 'pollinations' || body.aiMode === 'custom') settings.aiMode = body.aiMode;
   if (settings.aiMode === 'pollinations') {
-    settings.aiEndpoint = 'https://text.pollinations.ai/openai';
-    settings.aiModel = 'openai';
-    settings.aiApiKey = '';
+    settings.aiEndpoint = 'https://gen.pollinations.ai/v1/chat/completions';
+    settings.aiModel = 'openai/gpt-5.4-nano';
   } else {
     if (typeof body.aiEndpoint === 'string' && body.aiEndpoint.trim()) {
       if (!isValidHttpUrl(body.aiEndpoint.trim()) || !body.aiEndpoint.trim().startsWith('https://')) return sendError(res, 400, 'Endpoint AI harus URL HTTPS.');
@@ -294,6 +295,12 @@ app.post('/api/admin/settings', requireAdmin, ensureCsrf, async (req, res) => {
     settings.aiApiKey = body.aiApiKey.trim();
   }
   if (body.clearAiApiKey === true) settings.aiApiKey = '';
+  if (typeof body.pollinationsApiKey === 'string' && body.pollinationsApiKey.trim()) {
+    if (!body.pollinationsApiKey.trim().startsWith('sk_')) return sendError(res, 400, 'Secret key Pollinations harus berawalan sk_. Jangan gunakan App Key pk_ untuk permintaan API.');
+    if (body.pollinationsApiKey.length > 1000) return sendError(res, 400, 'Secret key Pollinations terlalu panjang.');
+    settings.pollinationsApiKey = body.pollinationsApiKey.trim();
+  }
+  if (body.clearPollinationsApiKey === true) settings.pollinationsApiKey = '';
   if (typeof body.fallbackPrefix === 'string' && body.fallbackPrefix.trim().length <= 120) settings.fallbackPrefix = body.fallbackPrefix.trim();
   if (typeof body.publicBaseUrl === 'string') {
     const value = body.publicBaseUrl.trim();
@@ -328,7 +335,7 @@ app.post('/api/admin/test-ai', requireAdmin, ensureCsrf, async (_req, res) => {
   const result = await testFreeAI();
   logActivity(result.ok ? 'ai_test' : 'ai_error', result.ok ? 'Uji koneksi AI berhasil' : 'Uji koneksi AI gagal');
   await persist();
-  return res.json({ ok: result.ok, answer: result.answer, note: result.ok ? 'AI memberi respons.' : 'AI belum berhasil menjawab. Periksa jaringan server atau status Pollinations, Kilo, LLM7, dan AI Horde.' });
+  return res.json({ ok: result.ok, answer: result.answer, note: result.ok ? 'AI memberi respons.' : 'AI belum berhasil menjawab. Periksa secret key Pollinations bila dipakai, lalu periksa koneksi dan status Kilo, LLM7, serta AI Horde.' });
 });
 
 // Platform connector configuration. Secrets are never returned to the browser.

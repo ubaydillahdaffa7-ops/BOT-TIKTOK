@@ -1,9 +1,9 @@
 import { getDb, logActivity, persist } from './store.js';
 
-// Keep the legacy Pollinations route because the existing DAFZZ website uses it.
-// The backup sequence uses best-effort anonymous/free gateways; availability can change.
-const POLLINATIONS_ENDPOINT = 'https://text.pollinations.ai/openai';
-const POLLINATIONS_MODEL = 'openai';
+// Current Pollinations API: text generation requires a server-side secret key.
+// Anonymous backup providers are best-effort and may change their limits or availability.
+const POLLINATIONS_ENDPOINT = 'https://gen.pollinations.ai/v1/chat/completions';
+const POLLINATIONS_MODEL = 'openai/gpt-5.4-nano';
 const FREE_FALLBACKS = [
   {
     name: 'Kilo AI Gateway (model gratis)',
@@ -29,6 +29,10 @@ const SYSTEM_PROMPT = [
   'Kamu adalah DAFZZ BOT, asisten percakapan yang ramah dan membantu pengguna Indonesia.',
   'Jawab dalam bahasa Indonesia yang natural, jelas, relevan, dan tidak bertele-tele.',
   'Jangan gunakan emoji. Jangan mengaku bisa menjalankan fitur yang belum tersedia.',
+  'Utamakan ketepatan daripada terdengar yakin. Jangan mengarang nama, tanggal, angka, sumber, status koneksi, hasil pemeriksaan, atau kemampuan aplikasi.',
+  'Jika informasi tidak tersedia di percakapan atau instruksi ini, katakan bahwa kamu belum dapat memastikannya dan jelaskan data apa yang diperlukan. Bedakan fakta, perkiraan, dan saran.',
+  'Untuk informasi yang berubah-ubah seperti berita, harga, jadwal, kebijakan, atau versi layanan, jangan menyebutnya sebagai informasi terkini tanpa sumber atau pemeriksaan langsung.',
+  'Jangan berpura-pura sudah membuka website, menjalankan tool, mengirim pesan, mengubah repository, atau menguji akun jika tindakan itu tidak benar-benar dilakukan.',
   'DAFZZ memiliki 401 entri dalam tujuh kategori: AI & Bot Commands, Foto & Desain, Teks & Data, Dokumen & File, Konverter & Kalkulator, Keamanan & Privasi, Web & Developer.',
   'Kategori AI & Bot Commands berisi Chat AI, 50 alat AI/lokal, dan 50 perintah bot. Koneksi chat saat ini memproses pesan teks.',
   'Jika pengguna ingin memakai tool DAFZZ, arahkan untuk mengetik .menu atau nama perintah tool.',
@@ -38,7 +42,8 @@ const SYSTEM_PROMPT = [
 export function resolveAIConfiguration(settings = {}) {
   const mode = settings.aiMode === 'custom' ? 'custom' : 'pollinations';
   if (mode === 'pollinations') {
-    return { mode, endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL, apiKey: '' };
+    const candidateKey = String(settings.pollinationsApiKey || process.env.POLLINATIONS_API_KEY || '').trim();
+    return { mode, endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL, apiKey: candidateKey.startsWith('sk_') ? candidateKey : '' };
   }
   return {
     mode,
@@ -106,7 +111,7 @@ async function requestProvider(provider, userText) {
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: String(userText).slice(0, 4000) }
         ],
-        temperature: 0.6,
+        temperature: 0.25,
         max_tokens: 420,
         stream: false
       })
@@ -136,9 +141,9 @@ async function requestProvider(provider, userText) {
 function getProviderChain(settings) {
   const config = resolveAIConfiguration(settings);
   const primary = config.mode === 'custom'
-    ? { name: 'AI Manual', endpoint: config.endpoint, model: config.model, apiKey: config.apiKey }
-    : { name: 'Pollinations AI', endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL, timeout: 12000 };
-  return [primary, ...FREE_FALLBACKS];
+    ? [{ name: 'AI Manual', endpoint: config.endpoint, model: config.model, apiKey: config.apiKey }]
+    : (config.apiKey ? [{ name: 'Pollinations AI', endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL, apiKey: config.apiKey, timeout: 15000 }] : []);
+  return [...primary, ...FREE_FALLBACKS];
 }
 
 export async function askFreeAI(userText, context = {}) {
