@@ -1,25 +1,38 @@
 import { getDb, logActivity, persist } from './store.js';
 
-// Primary provider: the exact legacy Pollinations endpoint already used by the user's working site.
+// Keep the legacy Pollinations route because the existing DAFZZ website uses it.
+// The backup sequence uses best-effort anonymous/free gateways; availability can change.
 const POLLINATIONS_ENDPOINT = 'https://text.pollinations.ai/openai';
 const POLLINATIONS_MODEL = 'openai';
-
-// Three keyless fallback gateways. These are best-effort community services;
-// their free quotas, availability, and terms can change without notice.
 const FREE_FALLBACKS = [
-  { name: 'JarvisClaw Free', endpoint: 'https://api.jarvisclaw.ai/v1/chat/completions', model: 'auto/free' },
-  { name: 'Free.ai', endpoint: 'https://api.free.ai/v1/chat/completions', model: 'deepseek-r1' },
-  { name: 'Kilo Gateway Free', endpoint: 'https://api.kilo.ai/api/gateway/chat/completions', model: 'kilo-auto/free' }
+  {
+    name: 'Kilo AI Gateway (model gratis)',
+    endpoint: 'https://ai-gateway.kilo.ai/api/v1/chat/completions',
+    model: 'kilo-auto/free',
+    timeout: 15000
+  },
+  {
+    name: 'LLM7 (akses anonim)',
+    endpoint: 'https://api.llm7.io/v1/chat/completions',
+    model: 'dynamic-llm7-model',
+    timeout: 14000
+  },
+  {
+    name: 'AI Horde (anonim)',
+    endpoint: 'https://oai.aihorde.net/v1/chat/completions',
+    model: 'dynamic-horde-model',
+    apiKey: '0000000000',
+    timeout: 22000
+  }
 ];
-const PROVIDER_TIMEOUT_MS = 12000;
 const SYSTEM_PROMPT = [
   'Kamu adalah DAFZZ BOT, asisten percakapan yang ramah dan membantu pengguna Indonesia.',
   'Jawab dalam bahasa Indonesia yang natural, jelas, relevan, dan tidak bertele-tele.',
   'Jangan gunakan emoji. Jangan mengaku bisa menjalankan fitur yang belum tersedia.',
   'DAFZZ memiliki 401 entri dalam tujuh kategori: AI & Bot Commands, Foto & Desain, Teks & Data, Dokumen & File, Konverter & Kalkulator, Keamanan & Privasi, Web & Developer.',
-  'Kategori AI & Bot Commands berisi Chat AI, 50 alat AI/lokal, dan 50 perintah bot TikTok. Jangan mengaku bisa mengirim foto atau stiker lewat TikTok Bridge bawaan karena konektor yang dipasang hanya mendukung pesan teks.',
+  'Kategori AI & Bot Commands berisi Chat AI, 50 alat AI/lokal, dan 50 perintah bot. Koneksi chat saat ini memproses pesan teks.',
   'Jika pengguna ingin memakai tool DAFZZ, arahkan untuk mengetik .menu atau nama perintah tool.',
-  'Jika pesan tidak jelas, minta penjelasan singkat. Jangan meminta password, cookie, token, atau data rahasia.'
+  'Jika pesan tidak jelas, minta penjelasan singkat. Jangan meminta password, cookie, token, kode OTP, atau data rahasia.'
 ].join(' ');
 
 export function resolveAIConfiguration(settings = {}) {
@@ -40,20 +53,55 @@ function getFallback(prefix, detail = 'AI sedang tidak tersedia. Coba lagi nanti
 }
 
 export function isFallbackAIResponse(answer) {
-  const failureHints = ['AI tidak dapat menjawab saat ini.', 'Layanan AI terlalu lama merespons.', 'Fitur AI sedang dinonaktifkan.', 'Konfigurasi AI belum lengkap.', 'AI sedang tidak tersedia.'];
+  const failureHints = ['AI tidak dapat menjawab saat ini.', 'Layanan AI terlalu lama merespons.', 'Fitur AI sedang dinonaktifkan.', 'Konfigurasi AI belum lengkap.', 'AI sedang tidak tersedia.', 'Semua layanan AI'];
   return failureHints.some(hint => String(answer || '').includes(hint));
+}
+
+async function getHordeModel() {
+  const response = await fetch('https://oai.aihorde.net/v1/models', {
+    headers: { Authorization: 'Bearer 0000000000' },
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!response.ok) throw new Error(`AI Horde models HTTP ${response.status}`);
+  const payload = await response.json();
+  const models = Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []);
+  const available = models.map(item => typeof item === 'string' ? item : item?.id).filter(Boolean);
+  const preferred = available.find(name => /instruct|chat|llama|qwen|mistral/i.test(name)) || available[0];
+  if (!preferred) throw new Error('AI Horde belum mengumumkan model teks yang tersedia');
+  return preferred;
+}
+
+async function getLLM7Model() {
+  const response = await fetch('https://api.llm7.io/v1/models', {
+    signal: AbortSignal.timeout(7000)
+  });
+  if (!response.ok) throw new Error(`LLM7 models HTTP ${response.status}`);
+  const payload = await response.json();
+  const models = Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []);
+  const rows = models.map(item => typeof item === 'string' ? { id: item } : item).filter(item => item?.id);
+  const knownAnonymous = ['gpt-oss:20b', 'mistral-Nemo-Instruct-2407', 'codestral-latest', 'nemotron-3-nano:30b', 'minimax-m2.7'];
+  const eligible = rows.filter(item => item.usage_based_only === false || knownAnonymous.includes(item.id));
+  const preferred = eligible.find(item => knownAnonymous.includes(item.id)) || eligible[0];
+  if (!preferred?.id) throw new Error('LLM7 tidak mengumumkan model anonim yang dikenal');
+  return preferred.id;
 }
 
 async function requestProvider(provider, userText) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), provider.timeout || 12000);
   try {
+    const model = provider.model === 'dynamic-horde-model'
+      ? await getHordeModel()
+      : provider.model === 'dynamic-llm7-model' ? await getLLM7Model() : provider.model;
     const response = await fetch(provider.endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {}) },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {})
+      },
       signal: controller.signal,
       body: JSON.stringify({
-        model: provider.model,
+        model,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: String(userText).slice(0, 4000) }
@@ -67,18 +115,17 @@ async function requestProvider(provider, userText) {
       const errorText = await response.text().catch(() => '');
       throw new Error(`HTTP ${response.status}${errorText ? `: ${errorText.slice(0, 120)}` : ''}`);
     }
-    const contentType = response.headers.get('content-type') || '';
-    let answer = '';
-    if (contentType.includes('application/json')) {
-      const payload = await response.json();
-      const content = payload?.choices?.[0]?.message?.content ?? payload?.output_text ?? payload?.text ?? '';
-      answer = Array.isArray(content)
-        ? content.map(part => typeof part === 'string' ? part : part?.text || '').join('\n')
-        : String(content || '');
-    } else {
-      answer = await response.text();
-    }
-    answer = answer.trim();
+    const raw = await response.text();
+    let payload;
+    try { payload = JSON.parse(raw); } catch { payload = { text: raw }; }
+    const content = payload?.choices?.[0]?.message?.content
+      ?? payload?.choices?.[0]?.text
+      ?? payload?.output_text
+      ?? payload?.text
+      ?? '';
+    const answer = (Array.isArray(content)
+      ? content.map(part => typeof part === 'string' ? part : part?.text || '').join('\n')
+      : String(content || '')).trim();
     if (!answer) throw new Error('Provider mengirim jawaban kosong');
     return answer.slice(0, 3400);
   } finally {
@@ -90,7 +137,7 @@ function getProviderChain(settings) {
   const config = resolveAIConfiguration(settings);
   const primary = config.mode === 'custom'
     ? { name: 'AI Manual', endpoint: config.endpoint, model: config.model, apiKey: config.apiKey }
-    : { name: 'Pollinations AI', endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL };
+    : { name: 'Pollinations AI', endpoint: POLLINATIONS_ENDPOINT, model: POLLINATIONS_MODEL, timeout: 12000 };
   return [primary, ...FREE_FALLBACKS];
 }
 
@@ -127,7 +174,11 @@ export async function askFreeAI(userText, context = {}) {
 }
 
 export async function testFreeAI() {
-  const answer = await askFreeAI('Balas tepat: Koneksi AI DAFZZ aktif.', { requesterIp: 'admin-test' });
+  const answer = await askFreeAI('Balas tepat: Koneksi AI DAFZZ aktif.', { includePrefix: false, requesterIp: 'admin-test' });
   const ok = Boolean(answer) && !isFallbackAIResponse(answer);
   return { ok, answer, configuration: resolveAIConfiguration(getDb().settings), fallbackCount: FREE_FALLBACKS.length };
+}
+
+export function getAIFallbackProviders() {
+  return FREE_FALLBACKS.map(({ name, endpoint, model }) => ({ name, endpoint, model }));
 }

@@ -27,9 +27,7 @@
 <div class="ambient-rail rail-one" aria-hidden="true"></div>
 <div class="ambient-rail rail-two" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="#" id="homeLink" aria-label="DAFZZ-TOOLS beranda">
-    <span class="brand-mark">D</span><span class="brand-name">DAFZZ<span class="brand-blue">-TOOLS</span></span>
-  </a>
+  <div class="brand" aria-label="DAFZZ-TOOLS"><button class="brand-mark info-trigger" type="button" data-admin-info-trigger aria-label="Buka Info Admin" title="Info Admin">D</button><a class="brand-name" href="#" id="homeLink">DAFZZ<span class="brand-blue">-TOOLS</span></a></div>
   <nav aria-label="Navigasi utama">
     <button data-gohome="homeView"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Beranda</button>
     <button data-gohome="categories"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Kategori</button>
@@ -40,6 +38,16 @@
   </nav>
   <button id="themeBtn" class="icon-btn" aria-label="Ganti tema" title="Ganti tema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/></svg></button>
 </header>
+<dialog class="admin-info-dialog" id="adminInfoDialog" aria-labelledby="adminInfoTitle">
+  <div class="admin-info-card">
+    <div class="admin-info-head"><div><p class="eyebrow">DAFZZ / DEVELOPER INFORMATION</p><h2 id="adminInfoTitle">Info Admin</h2></div><button class="admin-info-close" type="button" data-admin-info-close aria-label="Tutup">×</button></div>
+    <div class="admin-info-owner"><span class="admin-info-avatar">D</span><div><small>OWNER</small><strong>𓆩 ᖽᐸɪղᘜ ༒ ᙃᴀ̷𝖿ᴢᴢ 𓆪</strong></div></div>
+    <div class="admin-info-block"><span>PROJECT</span><a href="https://portofolio-dafzz-stlr.onrender.com" target="_blank" rel="noopener noreferrer">portofolio-dafzz-stlr.onrender.com</a><a href="https://belajar-si-qjko.onrender.com" target="_blank" rel="noopener noreferrer">belajar-si-qjko.onrender.com</a></div>
+    <div class="admin-info-block"><span>LAPORAN BUG</span><a class="admin-info-report" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ubaydillahdaffa7%40gmail.com&amp;su=Laporan%20Bug%20DAFZZ-TOOLS" target="_blank" rel="noopener noreferrer"><strong>Laporkan bug via Gmail</strong><span>↗</span></a><small>Tujuan laporan: <a href="mailto:ubaydillahdaffa7@gmail.com">ubaydillahdaffa7@gmail.com</a></small></div>
+    <div class="admin-info-block"><span>TIKTOK DM</span><a href="https://www.tiktok.com/@.root_403_access" target="_blank" rel="noopener noreferrer">tiktok.com/@.root_403_access</a></div>
+    <p class="admin-info-foot">DAFZZ-TOOLS · ADMIN INFORMATION</p>
+  </div>
+</dialog>
 <main class="container">
 <section id="homeView" class="hero">
   <div class="hero-copy">
@@ -112,6 +120,7 @@
 </main>
 <footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-TOOLS</span></span><span>TOOLS FOR EVERYDAY DIGITAL WORK</span><span>© 2026</span></div><div class="footer-bottom"><span>BUILT FOR THE BROWSER</span><span>DESIGNED TO BE USEFUL</span></div></footer>
 <div id="toast" class="toast" role="status"></div>
+<script src="admin-info.js" defer></script>
 <script src="script.js"></script>
 </body>
 </html>

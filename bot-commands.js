@@ -4,15 +4,15 @@ import { getDb } from './store.js';
 
 const COMMANDS = [
   ['pin','Mencari gambar melalui tautan pencarian','.pin Naruto #7'],
-  ['s','Konversi gambar ke stiker; memerlukan dukungan media Bridge','.s (balas gambar)'],
-  ['toimg','Konversi stiker ke gambar; memerlukan dukungan media Bridge','.toimg (balas stiker)'],
+  ['s','Konversi gambar ke stiker; memerlukan dukungan media' ,'.s (balas gambar)'],
+  ['toimg','Konversi stiker ke gambar; memerlukan dukungan media' ,'.toimg (balas stiker)'],
   ['anime','Mencari informasi anime','.anime Naruto'],
   ['manga','Mencari informasi manga','.manga One Piece'],
   ['randomanime','Rekomendasi anime acak','.randomanime'],
   ['randommanga','Rekomendasi manga acak','.randommanga'],
   ['topanime','Melihat daftar anime populer','.topanime'],
   ['character','Mencari karakter anime','.character Naruto'],
-  ['ai','Bertanya langsung kepada AI di DM','.ai pertanyaan'],
+  ['ai','Bertanya langsung kepada AI dari chat','.ai pertanyaan'],
   ['pokemon','Informasi Pokémon berdasarkan nama','.pokemon pikachu'],
   ['randompokemon','Memilih Pokémon secara acak','.randompokemon'],
   ['pokemonmove','Informasi jurus Pokémon','.pokemonmove thunderbolt'],
@@ -100,7 +100,7 @@ async function pinImageSearch(term, count) {
     })).filter(item => item.url).slice(0, count);
     if (images.length) return `Hasil gambar untuk: ${term}\nDitemukan: ${images.length} dari maksimal ${count}\n\n${images.map((item, index) => `${index + 1}. ${item.name}\n${item.url}`).join('\n\n')}\n\nSumber: Wikimedia Commons. Bridge hanya mengirim tautan teks, bukan lampiran foto.`.slice(0, 3800);
   } catch { /* fall back to a public image-search page */ }
-  return `Pencarian gambar: ${term}\nJumlah yang diminta: ${count} (maksimal 10).\nBridge TikTok hanya mendukung pesan teks, jadi foto belum dapat dikirim sebagai lampiran.\n${googleSearch(term, 'images')}`;
+  return `Pencarian gambar: ${term}\nJumlah yang diminta: ${count} (maksimal 10).\nHasil dikirim sebagai tautan pencarian karena konektor chat saat ini hanya mengirim teks.\n${googleSearch(term, 'images')}`;
 }
 
 async function jikanSearch(kind, query) {
@@ -131,7 +131,7 @@ const RIDDLES = [
 ];
 const EIGHT_BALL = ['Sangat mungkin.', 'Sepertinya iya.', 'Tanda-tandanya mengarah ke iya.', 'Belum bisa dipastikan.', 'Coba tanyakan lagi nanti.', 'Sepertinya tidak.', 'Kemungkinan kecil.', 'Jangan mengandalkannya.'];
 
-// Semua 25 tool AI juga dapat dipanggil langsung dari DM TikTok.
+// Semua 25 tool AI juga dapat dipanggil langsung dari chat bot yang tersambung.
 const AI_TOOL_PROMPTS = {
   'ai-story': 'Buat cerita pendek yang orisinal dan menarik dari ide berikut.',
   'ai-novel-outline': 'Buat kerangka novel dengan premis, karakter, konflik utama, dan 8 bab.',
@@ -232,7 +232,7 @@ async function answerCommand(command, argument) {
     }
     case 's':
     case 'toimg':
-      return `Perintah .${command} dikenali, tetapi belum dapat memproses lampiran. Bridge TikTok yang disertakan hanya mendukung pesan teks; fitur ini memerlukan Bridge dengan dukungan unduh dan kirim media.`;
+      return `Perintah .${command} dikenali, tetapi pemrosesan lampiran belum tersedia. Konektor chat saat ini memproses teks dan tautan; fitur media membutuhkan modul unggah dan kirim media terpisah.`;
     case 'anime': return jikanSearch('anime', query);
     case 'manga': return jikanSearch('manga', query);
     case 'character': return jikanSearch('characters', query);
@@ -385,7 +385,7 @@ async function answerCommand(command, argument) {
     case 'botstatus': {
       const db = getDb();
       const stats = db.stats || {};
-      return `STATUS DAFZZ BOT\nBot: ${db.settings?.botEnabled === false ? 'OFF' : 'ON'}\nDM masuk: ${stats.received || 0}\nBalasan: ${stats.replied || 0}\nBalasan AI: ${stats.aiReplies || 0}\nTautan tool: ${stats.toolLinks || 0}`;
+      return `STATUS DAFZZ BOT\nTikTok: ${db.settings?.botEnabled === false ? 'OFF' : 'ON'}\nTelegram: ${db.settings?.platforms?.telegram?.enabled ? 'AKTIF' : 'OFF'}\nWhatsApp: ${db.settings?.platforms?.whatsapp?.enabled ? 'AKTIF' : 'OFF'}\nPesan masuk: ${stats.received || 0}\nBalasan: ${stats.replied || 0}\nBalasan AI: ${stats.aiReplies || 0}\nTautan tool: ${stats.toolLinks || 0}`;
     }
     case 'timeid': return `WAKTU WIB\n${timeId()}`;
     case 'dateid': return `TANGGAL INDONESIA\n${new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'full' }).format(new Date())}`;

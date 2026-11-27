@@ -6,7 +6,8 @@ import session from 'express-session';
 import multer from 'multer';
 import { DATA_DIR, getDb, getSessionSecret, initStore, logActivity, makePasswordRecord, persist, pruneExpired, randomToken, verifyPassword } from './store.js';
 import { verifyTikTokBridgeSignature, safeFileName, isValidHttpUrl } from './security.js';
-import { handleTikTokEvent, getCatalogStats, findCatalogTool, sendTikTokText } from './bot.js';
+import { handleTikTokEvent, getCatalogStats, findCatalogTool } from './bot.js';
+import { getTelegramStatus, getWhatsAppStatus, sendPlatformText, startConfiguredConnectors, startTelegramPolling, stopTelegramPolling, testTelegramToken, startWhatsApp, stopWhatsApp } from './connectors.js';
 import { testFreeAI, askFreeAI, isFallbackAIResponse } from './ai.js';
 
 const PORT = Number(process.env.PORT || 3000);
@@ -106,7 +107,7 @@ app.post('/webhooks/tiktok', express.raw({ type: 'application/json', limit: '64k
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 
-app.get('/healthz', (_req, res) => res.json({ ok: true, app: 'DAFZZ TikTok Bot', tools: getCatalogStats().total }));
+app.get('/healthz', (_req, res) => res.json({ ok: true, app: 'DAFZZ Multi-Platform Bot', tools: getCatalogStats().total }));
 app.get('/api/catalog', (_req, res) => res.json(getCatalogStats()));
 
 // Public Chat AI endpoint: API credentials remain on the server and requests are rate limited.
@@ -212,8 +213,22 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
   const activeSessions = Object.values(db.sessions).filter(item => item?.expiresAt > Date.now()).length;
   const storedResults = Object.values(db.downloads).filter(item => item?.expiresAt > Date.now()).length;
   const aiMode = db.settings.aiMode === 'custom' ? 'custom' : 'pollinations';
+  const platforms = {
+    tiktok: { enabled: db.settings.botEnabled !== false, riskAcceptedAt: db.settings.platforms?.tiktok?.riskAcceptedAt || null },
+    telegram: { ...getTelegramStatus(), riskAcceptedAt: db.settings.platforms?.telegram?.riskAcceptedAt || null },
+    whatsapp: {
+      enabled: db.settings.platforms?.whatsapp?.enabled === true,
+      connected: getWhatsAppStatus().connected,
+      status: getWhatsAppStatus().status,
+      phoneNumber: getWhatsAppStatus().phoneNumber,
+      displayName: getWhatsAppStatus().displayName,
+      lastError: getWhatsAppStatus().lastError,
+      riskAcceptedAt: db.settings.platforms?.whatsapp?.riskAcceptedAt || null
+    }
+  };
   res.json({
     catalog,
+    platforms,
     stats: db.stats,
     bridge,
     bot: { enabled: db.settings.botEnabled !== false, webhookPath: '/webhooks/tiktok', activeSessions, storedResults },
@@ -221,9 +236,9 @@ app.get('/api/admin/overview', requireAdmin, async (_req, res) => {
     ai: {
       enabled: db.settings.aiEnabled,
       mode: aiMode,
-      provider: aiMode === 'pollinations' ? 'Pollinations AI' : 'Custom OpenAI-compatible API',
+      provider: aiMode === 'pollinations' ? 'Pollinations → Kilo → LLM7 → AI Horde' : 'Custom API → Kilo → LLM7 → AI Horde',
       endpoint: aiMode === 'pollinations' ? 'https://text.pollinations.ai/openai' : db.settings.aiEndpoint,
-      model: aiMode === 'pollinations' ? 'openai' : db.settings.aiModel,
+      model: aiMode === 'pollinations' ? 'openai / automatic fallback' : db.settings.aiModel,
       apiKeySet: Boolean(db.settings.aiApiKey)
     },
     logs: Array.isArray(db.logs) ? db.logs.slice(0, 30) : [],
@@ -255,7 +270,11 @@ app.post('/api/admin/settings', requireAdmin, ensureCsrf, async (req, res) => {
   if (typeof body.webhookSecret === 'string' && body.webhookSecret.trim()) settings.webhookSecret = body.webhookSecret.trim();
   if (body.clearBridgeToken === true) settings.bridgeApiToken = '';
   if (body.clearWebhookSecret === true) settings.webhookSecret = '';
-  if (typeof body.botEnabled === 'boolean') settings.botEnabled = body.botEnabled;
+  if (typeof body.botEnabled === 'boolean') {
+    if (body.botEnabled && !settings.platforms?.tiktok?.riskAcceptedAt && body.riskAcknowledged !== true) return sendError(res, 428, 'Baca dan setujui lima peringatan risiko sebelum mengaktifkan bot TikTok.');
+    if (body.riskAcknowledged === true) { settings.platforms ||= {}; settings.platforms.tiktok ||= {}; settings.platforms.tiktok.riskAcceptedAt = new Date().toISOString(); }
+    settings.botEnabled = body.botEnabled;
+  }
   if (typeof body.aiEnabled === 'boolean') settings.aiEnabled = body.aiEnabled;
   if (body.aiMode === 'pollinations' || body.aiMode === 'custom') settings.aiMode = body.aiMode;
   if (settings.aiMode === 'pollinations') {
@@ -309,14 +328,102 @@ app.post('/api/admin/test-ai', requireAdmin, ensureCsrf, async (_req, res) => {
   const result = await testFreeAI();
   logActivity(result.ok ? 'ai_test' : 'ai_error', result.ok ? 'Uji koneksi AI berhasil' : 'Uji koneksi AI gagal');
   await persist();
-  return res.json({ ok: result.ok, answer: result.answer, note: result.ok ? 'AI memberi respons.' : 'AI belum berhasil menjawab. Periksa endpoint/model manual atau ketersediaan Pollinations.' });
+  return res.json({ ok: result.ok, answer: result.answer, note: result.ok ? 'AI memberi respons.' : 'AI belum berhasil menjawab. Periksa jaringan server atau status Pollinations, Kilo, LLM7, dan AI Horde.' });
+});
+
+// Platform connector configuration. Secrets are never returned to the browser.
+app.get('/api/admin/platforms/status', requireAdmin, (_req, res) => {
+  const settings = getDb().settings;
+  res.json({
+    ok: true,
+    telegram: { ...getTelegramStatus(), enabled: settings.platforms?.telegram?.enabled === true, riskAcceptedAt: settings.platforms?.telegram?.riskAcceptedAt || null },
+    whatsapp: { ...getWhatsAppStatus(), enabled: settings.platforms?.whatsapp?.enabled === true, riskAcceptedAt: settings.platforms?.whatsapp?.riskAcceptedAt || null }
+  });
+});
+
+app.post('/api/admin/platforms/telegram/test', requireAdmin, ensureCsrf, async (req, res) => {
+  try {
+    const identity = await testTelegramToken(String(req.body?.token || ''));
+    return res.json({ ok: true, bot: { username: identity.bot.username, firstName: identity.bot.first_name }, webhookActive: Boolean(identity.webhook?.url) });
+  } catch (error) { return sendError(res, 400, error.message || 'Token Telegram tidak bisa diperiksa.'); }
+});
+
+app.post('/api/admin/platforms/telegram/config', requireAdmin, ensureCsrf, async (req, res) => {
+  const settings = getDb().settings;
+  const token = String(req.body?.token || '').trim();
+  const enabled = req.body?.enabled === true;
+  if (token && token.length > 300) return sendError(res, 400, 'Token Telegram terlalu panjang.');
+  if (enabled && !token && !settings.telegramBotToken) return sendError(res, 400, 'Masukkan token Telegram terlebih dahulu.');
+  if (enabled && req.body?.riskAcknowledged !== true && !settings.platforms?.telegram?.riskAcceptedAt) return sendError(res, 428, 'Setujui lima peringatan risiko sebelum mengaktifkan Telegram.');
+  const changed = token && token !== settings.telegramBotToken;
+  if (changed || !enabled) await stopTelegramPolling();
+  if (token) settings.telegramBotToken = token;
+  settings.platforms ||= {};
+  settings.platforms.telegram ||= {};
+  settings.platforms.telegram.enabled = enabled;
+  if (req.body?.riskAcknowledged === true) settings.platforms.telegram.riskAcceptedAt = new Date().toISOString();
+  if (!enabled) settings.telegramUpdateOffset = 0;
+  await persist();
+  if (enabled) {
+    try { await startTelegramPolling(); }
+    catch (error) {
+      logActivity('telegram_error', `Bot Telegram gagal diaktifkan: ${error.message}`);
+      await persist();
+      return sendError(res, 502, error.message || 'Bot Telegram gagal dimulai.');
+    }
+  }
+  logActivity(enabled ? 'telegram_configured' : 'telegram_stopped', enabled ? 'Bot Telegram diaktifkan' : 'Bot Telegram dinonaktifkan');
+  await persist();
+  return res.json({ ok: true, telegram: getTelegramStatus() });
+});
+
+app.post('/api/admin/platforms/whatsapp/pair', requireAdmin, ensureCsrf, async (req, res) => {
+  if (req.body?.riskAcknowledged !== true && !getDb().settings.platforms?.whatsapp?.riskAcceptedAt) return sendError(res, 428, 'Setujui lima peringatan risiko sebelum menautkan WhatsApp.');
+  const phoneNumber = String(req.body?.phoneNumber || '').trim();
+  const settings = getDb().settings;
+  settings.platforms ||= {};
+  settings.platforms.whatsapp ||= {};
+  settings.platforms.whatsapp.enabled = true;
+  if (req.body?.riskAcknowledged === true) settings.platforms.whatsapp.riskAcceptedAt = new Date().toISOString();
+  await persist();
+  try {
+    const status = await startWhatsApp(phoneNumber);
+    logActivity('whatsapp_pair_started', 'Proses penautan WhatsApp dimulai');
+    await persist();
+    return res.json({ ok: true, whatsapp: status });
+  } catch (error) {
+    logActivity('whatsapp_error', `Konektor WhatsApp gagal dimulai: ${error.message}`);
+    await persist();
+    return sendError(res, 502, error.message || 'Konektor WhatsApp gagal dimulai.');
+  }
+});
+
+app.post('/api/admin/platforms/whatsapp/logout', requireAdmin, ensureCsrf, async (_req, res) => {
+  const settings = getDb().settings;
+  settings.platforms ||= {};
+  settings.platforms.whatsapp ||= {};
+  settings.platforms.whatsapp.enabled = false;
+  const status = await stopWhatsApp({ logout: true });
+  await persist();
+  logActivity('whatsapp_logged_out', 'Sesi WhatsApp dihapus dan konektor dinonaktifkan');
+  return res.json({ ok: true, whatsapp: status });
+});
+
+app.post('/api/admin/platforms/whatsapp/stop', requireAdmin, ensureCsrf, async (_req, res) => {
+  const settings = getDb().settings;
+  settings.platforms ||= {};
+  settings.platforms.whatsapp ||= {};
+  settings.platforms.whatsapp.enabled = false;
+  const status = await stopWhatsApp();
+  await persist();
+  return res.json({ ok: true, whatsapp: status });
 });
 
 app.post('/api/run/:token/result', upload.single('file'), async (req, res) => {
   const db = getDb();
   pruneExpired();
   const runSession = db.sessions[req.params.token];
-  if (!runSession || runSession.expiresAt <= Date.now()) return sendError(res, 410, 'Sesi DAFZZ sudah kedaluwarsa. Jalankan perintah tool lagi dari TikTok.');
+  if (!runSession || runSession.expiresAt <= Date.now()) return sendError(res, 410, 'Sesi DAFZZ sudah kedaluwarsa. Jalankan perintah tool lagi dari chat bot.');
   let buffer;
   let fileName;
   let mime;
@@ -358,12 +465,12 @@ app.post('/api/run/:token/result', upload.single('file'), async (req, res) => {
   let sent = false;
   try {
     const key = crypto.createHash('sha256').update(`${req.params.token}:${diskName}`).digest('hex');
-    await sendTikTokText(runSession.conversationId, reply, `result:${key}`);
+    await sendPlatformText(runSession.platform || 'tiktok', runSession.conversationId, reply, `result:${key}`);
     sent = true;
   } catch (error) {
     console.error('[result-notify]', error?.message || error);
   }
-  return res.json({ ok: true, fileName, size: buffer.length, downloadUrl: link, notifiedTikTok: sent });
+  return res.json({ ok: true, fileName, size: buffer.length, downloadUrl: link, notified: sent, notifiedTikTok: (runSession.platform || 'tiktok') === 'tiktok' ? sent : false, platform: runSession.platform || 'tiktok' });
 });
 
 app.get('/api/run/:token/status', (req, res) => {
@@ -398,7 +505,7 @@ app.get('/admin', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html'
 app.get('/bot', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'bot.html')));
 app.get('/run/:token', (req, res) => {
   const entry = getDb().sessions[req.params.token];
-  if (!entry || entry.expiresAt <= Date.now()) return res.status(410).send('Sesi tool kedaluwarsa. Jalankan perintah tool kembali dari TikTok.');
+  if (!entry || entry.expiresAt <= Date.now()) return res.status(410).send('Sesi tool kedaluwarsa. Jalankan perintah tool kembali dari chat bot.');
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 app.get('/upload', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
@@ -426,6 +533,7 @@ setInterval(async () => {
 }, 60 * 60 * 1000).unref();
 
 app.listen(PORT, '0.0.0.0', () => {
+  startConfiguredConnectors().catch(error => console.warn('[connectors]', error?.message || error));
   const catalog = getCatalogStats();
   console.log(`DAFZZ web/bot listening on :${PORT}; catalog=${catalog.total}, categories=${catalog.categories.length}`);
 });

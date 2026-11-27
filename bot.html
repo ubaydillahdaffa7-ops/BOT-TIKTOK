@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#070d18">
-  <meta name="description" content="Dashboard kendali bot TikTok DAFZZ.">
+  <meta name="description" content="Dashboard DAFZZ untuk mengatur bot TikTok, Telegram, dan WhatsApp.">
   <title>DAFZZ — Menu Bot TT</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/bot.css">
@@ -14,19 +14,29 @@
   <div class="ambient-rail rail-one" aria-hidden="true"></div>
   <div class="ambient-rail rail-two" aria-hidden="true"></div>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="DAFZZ beranda"><span class="brand-mark">D</span><span class="brand-name">DAFZZ<span class="brand-blue">-TOOLS</span></span></a>
+    <div class="brand" aria-label="DAFZZ"><button class="brand-mark info-trigger" type="button" data-admin-info-trigger aria-label="Buka Info Admin" title="Info Admin">D</button><a class="brand-name" href="/">DAFZZ<span class="brand-blue">-TOOLS</span></a></div>
     <nav aria-label="Navigasi utama">
       <a class="config-nav-link menu-nav-link" href="/" aria-label="Tools" title="Tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 17.5 9.5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13 8 3 3"/></svg><span>Tools</span></a>
       <a class="config-nav-link bot-nav-link" href="/bot" aria-label="Bot TT" title="Bot TT"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v5M22 11v5"/></svg><span>Bot TT</span></a>
       <a class="config-nav-link advanced-nav-link" href="/admin" aria-label="Lanjutan" title="Lanjutan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Lanjutan</span></a>
     </nav>
   </header>
+<dialog class="admin-info-dialog" id="adminInfoDialog" aria-labelledby="adminInfoTitle">
+  <div class="admin-info-card">
+    <div class="admin-info-head"><div><p class="eyebrow">DAFZZ / DEVELOPER INFORMATION</p><h2 id="adminInfoTitle">Info Admin</h2></div><button class="admin-info-close" type="button" data-admin-info-close aria-label="Tutup">×</button></div>
+    <div class="admin-info-owner"><span class="admin-info-avatar">D</span><div><small>OWNER</small><strong>𓆩 ᖽᐸɪղᘜ ༒ ᙃᴀ̷𝖿ᴢᴢ 𓆪</strong></div></div>
+    <div class="admin-info-block"><span>PROJECT</span><a href="https://portofolio-dafzz-stlr.onrender.com" target="_blank" rel="noopener noreferrer">portofolio-dafzz-stlr.onrender.com</a><a href="https://belajar-si-qjko.onrender.com" target="_blank" rel="noopener noreferrer">belajar-si-qjko.onrender.com</a></div>
+    <div class="admin-info-block"><span>LAPORAN BUG</span><a class="admin-info-report" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ubaydillahdaffa7%40gmail.com&amp;su=Laporan%20Bug%20DAFZZ-TOOLS" target="_blank" rel="noopener noreferrer"><strong>Laporkan bug via Gmail</strong><span>↗</span></a><small>Tujuan laporan: <a href="mailto:ubaydillahdaffa7@gmail.com">ubaydillahdaffa7@gmail.com</a></small></div>
+    <div class="admin-info-block"><span>TIKTOK DM</span><a href="https://www.tiktok.com/@.root_403_access" target="_blank" rel="noopener noreferrer">tiktok.com/@.root_403_access</a></div>
+    <p class="admin-info-foot">DAFZZ-TOOLS · ADMIN INFORMATION</p>
+  </div>
+</dialog>
 
   <main class="container bot-container">
     <section id="loginGate" class="bot-login-gate hidden">
       <p class="eyebrow">DAFZZ BOT / ADMIN ACCESS</p>
       <h1>Masuk untuk membuka dashboard.</h1>
-      <p class="muted">Status bot, statistik DM, konfigurasi AI, dan log aktivitas hanya ditampilkan kepada administrator.</p>
+      <p class="muted">Status bot, statistik pesan, konfigurasi AI, dan log aktivitas hanya ditampilkan kepada administrator.</p>
       <a class="btn primary" href="/admin">Buka halaman administrator</a>
     </section>
 
@@ -34,8 +44,8 @@
       <section class="bot-hero">
         <div>
           <p class="eyebrow"><span class="live-dot"></span> DAFZZ BOT / CONTROL CENTER <span class="eyebrow-rule"></span> 02 / 02</p>
-          <h1>Menu <span>Bot TT.</span></h1>
-          <p class="bot-intro">Pantau koneksi TikTok, kendalikan balasan otomatis, periksa penggunaan AI, dan lihat aktivitas bot dari satu tempat.</p>
+          <h1>Menu <span>Bot.</span></h1>
+          <p class="bot-intro">Pantau TikTok, Telegram, dan WhatsApp. Atur balasan otomatis, penggunaan AI, serta aktivitas bot dari satu tempat.</p>
           <div class="bot-hero-meta"><span class="meta-mark"></span><span>401 ENTRI TERHUBUNG</span><i></i><span>7 KATEGORI</span><i></i><span>AI FALLBACK</span></div>
         </div>
         <div class="bot-control-card">
@@ -48,15 +58,24 @@
       </section>
 
       <section class="bot-metrics" aria-label="Statistik bot">
-        <article class="bot-metric"><span>DM DITERIMA</span><strong id="metricReceived">0</strong><small>Total pesan masuk diproses</small></article>
+        <article class="bot-metric"><span>PESAN DITERIMA</span><strong id="metricReceived">0</strong><small>Total pesan masuk diproses</small></article>
         <article class="bot-metric"><span>BALASAN BOT</span><strong id="metricReplied">0</strong><small>Respons dikirim melalui bridge</small></article>
         <article class="bot-metric"><span>BALASAN AI</span><strong id="metricAiReplies">0</strong><small>Fallback ke model AI</small></article>
         <article class="bot-metric"><span>HASIL TERSIMPAN</span><strong id="metricOutputs">0</strong><small>File atau teks keluaran</small></article>
         <article class="bot-metric"><span>SESI TOOL AKTIF</span><strong id="metricSessions">0</strong><small>Sesi browser yang belum kedaluwarsa</small></article>
       </section>
 
+      <section class="bot-section bot-platform-section">
+        <div class="bot-section-heading"><div><p class="eyebrow">01 / BOT CONFIGURATION</p><h2>Pilih konfigurasi bot</h2><p class="muted">Tiap platform punya halaman pemasangan, status, dan panduan sendiri.</p></div><span class="section-note">3 PLATFORM</span></div>
+        <div class="bot-platform-grid">
+          <a class="bot-platform-card" href="/admin#platform=tiktok"><span class="bot-platform-id">01 / TIKTOK</span><span class="bot-platform-mark">TT</span><span class="platform-status-tag" id="menuTikTokStatus">MEMUAT STATUS</span><strong>Bot TikTok</strong><p>Atur DM Bridge, webhook, sesi akun, dan respons bot TikTok.</p><span class="bot-platform-link">Buka konfigurasi <b>→</b></span></a>
+          <a class="bot-platform-card" href="/admin#platform=telegram"><span class="bot-platform-id">02 / TELEGRAM</span><span class="bot-platform-mark tg">TG</span><span class="platform-status-tag" id="menuTelegramStatus">MEMUAT STATUS</span><strong>Bot Telegram</strong><p>Masukkan token BotFather, periksa koneksi, lalu aktifkan bot.</p><span class="bot-platform-link">Buka konfigurasi <b>→</b></span></a>
+          <a class="bot-platform-card" href="/admin#platform=whatsapp"><span class="bot-platform-id">03 / WHATSAPP</span><span class="bot-platform-mark wa">WA</span><span class="platform-status-tag" id="menuWhatsAppStatus">MEMUAT STATUS</span><strong>Bot WhatsApp</strong><p>Tautkan nomor melalui pairing code atau QR dan kelola sesi.</p><span class="bot-platform-link">Buka konfigurasi <b>→</b></span></a>
+        </div>
+      </section>
+
       <section class="bot-section">
-        <div class="bot-section-heading"><div><p class="eyebrow">01 / SYSTEM CONNECTIONS</p><h2>Koneksi dan penyimpanan</h2></div><button class="btn small-btn" id="refreshBtn" type="button">Perbarui status</button></div>
+        <div class="bot-section-heading"><div><p class="eyebrow">02 / SYSTEM CONNECTIONS</p><h2>Koneksi dan penyimpanan</h2></div><button class="btn small-btn" id="refreshBtn" type="button">Perbarui status</button></div>
         <div class="bot-card-grid">
           <article class="bot-info-card">
             <div class="bot-card-head"><span class="bot-card-index">A / 01</span><span class="state-pill" id="bridgePill">MEMUAT</span></div>
@@ -107,6 +126,7 @@
   </main>
   <footer class="footer"><div class="footer-line"></div><div class="footer-main"><span class="footer-brand">DAFZZ<span>-BOT TT</span></span><span>BOT CONTROL CENTER</span><span>© 2026</span></div></footer>
   <div id="botToast" class="toast" role="status"></div>
+  <script src="/admin-info.js" defer></script>
   <script src="/bot-dashboard.js" defer></script>
 </body>
 </html>

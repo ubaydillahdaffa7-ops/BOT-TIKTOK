@@ -223,3 +223,23 @@ body.modal-open{overflow:hidden}
 .config-nav-link{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .config-nav-link:focus-visible{outline:2px solid #65bdff;outline-offset:3px;border-color:#65bdff;box-shadow:0 0 0 4px #168bff18,0 0 18px #168bff22}
 @media(hover:none){.config-nav-link:active{transform:scale(.96);border-color:#65bdff;box-shadow:inset 0 0 13px #168bff22}}
+
+/* Info Admin panel opened by the small D mark in the top-left corner. */
+.brand-mark.info-trigger{padding:0;cursor:pointer;font-family:inherit;transition:transform .18s,border-color .18s,box-shadow .18s}
+.brand-mark.info-trigger:hover{transform:translateY(-2px);border-color:#75c8ff;box-shadow:inset 0 0 18px #168bff28,0 0 22px #168bff35}
+.brand-mark.info-trigger:active{transform:translateY(1px) scale(.97)}
+.brand-mark.info-trigger:focus-visible{outline:2px solid #75c8ff;outline-offset:3px}
+.brand-name{text-decoration:none;color:inherit}
+.admin-info-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding-bottom:16px;border-bottom:1px solid #29445f}
+.admin-info-head .eyebrow{margin:0 0 6px;color:#70c2ff;font-size:8px;letter-spacing:.17em}
+.admin-info-head h2{margin:0;color:#edf7ff;font:650 25px 'Space Grotesk',Inter,sans-serif;letter-spacing:-.04em}
+.admin-info-close{width:34px;height:34px;border:1px solid #34516d;border-radius:8px;background:#0b1b2d;color:#d7edff;font-size:22px;cursor:pointer}
+.admin-info-owner{display:flex;align-items:center;gap:13px;padding:17px 0;border-bottom:1px solid #243d56}
+.admin-info-avatar{display:grid;place-items:center;width:44px;height:44px;flex:none;border:1px solid #438dc0;border-radius:11px;background:linear-gradient(145deg,#173d62,#0b1e34);color:#d8f1ff;font-size:22px;font-weight:850;box-shadow:inset 0 0 18px #168bff24}
+.admin-info-owner div{display:grid;gap:6px;min-width:0}.admin-info-owner small,.admin-info-block>span{color:#7092b1;font:8px ui-monospace,monospace;letter-spacing:.15em}
+.admin-info-owner strong{color:#e9f5ff;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.admin-info-block{display:grid;gap:7px;padding:14px 0;border-bottom:1px solid #243d56}.admin-info-block>a{color:#8bd0ff;font-size:11px;line-height:1.5;text-decoration:none;overflow-wrap:anywhere}.admin-info-block>a:hover{text-decoration:underline;color:#c0e8ff}.admin-info-block>small{color:#718ca7;font-size:9px;line-height:1.6}.admin-info-foot{margin:14px 0 0;color:#597d9f;font:8px ui-monospace,monospace;letter-spacing:.12em}
+
+.admin-info-report{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 13px;border:1px solid #31597a;border-radius:8px;background:linear-gradient(135deg,#14314d,#0b1b2c);color:#a8ddff!important;font-size:10px!important;font-weight:750;text-decoration:none!important;transition:transform .18s,border-color .18s,box-shadow .18s}
+.admin-info-report:hover{transform:translateY(-2px);border-color:#5aa4d5;box-shadow:0 8px 18px #0004,0 0 15px #168bff19}
+.admin-info-report span{font-size:15px}

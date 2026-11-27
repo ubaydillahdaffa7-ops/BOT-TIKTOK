@@ -1,6 +1,9 @@
 'use strict';
 const $ = id => document.getElementById(id);
 let csrfToken = '';
+let platformState = {};
+let pendingRiskAction = null;
+const riskAcknowledgements = new Set();
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
 
@@ -28,32 +31,128 @@ function setStatus(id, message, isError = false) {
   node.style.color = isError ? '#ff9aa8' : 'var(--cyan)';
 }
 
-async function refreshState() {
-  const state = await api('/api/admin/state');
-  csrfToken = state.csrfToken;
-  if (!state.authenticated) {
-    show('authPanel'); hide('dashboard');
-    if (state.setupRequired) {
-      $('authTitle').textContent = 'Buat administrator';
-      $('authDescription').textContent = 'Buat password admin pertama untuk mengunci halaman konfigurasi.';
-      $('authHint').textContent = 'Password minimal 12 karakter. Simpan di tempat aman.';
-      $('authSubmit').textContent = 'Buat administrator';
-      $('setupTokenWrap').classList.toggle('hidden', !state.setupTokenRequired);
-      $('setupToken').required = Boolean(state.setupTokenRequired);
-      $('adminPassword').setAttribute('autocomplete', 'new-password');
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
+}
+
+function setPill(id, label, state) {
+  const pill = $(id);
+  pill.textContent = label;
+  pill.className = `status-pill${state ? ` ${state}` : ''}`;
+}
+
+function selectPlatform(platform) {
+  document.querySelectorAll('[data-platform-nav]').forEach(button => {
+    const active = button.dataset.platformNav === platform;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', String(active));
+  });
+  document.querySelectorAll('[data-platform-panel]').forEach(panel => {
+    panel.classList.toggle('hidden', panel.dataset.platformPanel !== platform);
+  });
+  const panel = document.querySelector(`[data-platform-panel="${platform}"]`);
+  if (location.hash !== `#platform=${platform}`) history.replaceState(null, '', `#platform=${platform}`);
+  panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.querySelectorAll('[data-platform-nav]').forEach(button => {
+  button.addEventListener('click', () => selectPlatform(button.dataset.platformNav));
+});
+
+function updateRiskProgress() {
+  const count = riskAcknowledgements.size;
+  $('riskProgressText').textContent = `${count} dari 5 dipahami`;
+  $('riskProgressBar').style.width = `${count * 20}%`;
+  $('confirmRiskBtn').disabled = count !== 5;
+}
+
+function openRiskGate(platform, action) {
+  pendingRiskAction = { platform, action };
+  riskAcknowledgements.clear();
+  document.querySelectorAll('.risk-ack').forEach(button => {
+    button.disabled = false;
+    button.classList.remove('acknowledged');
+    button.textContent = 'Paham';
+  });
+  updateRiskProgress();
+  $('riskIntro').textContent = `Platform yang akan disambungkan: ${platform.toUpperCase()}. Baca setiap peringatan, lalu tekan tombol Paham di bagian tersebut.`;
+  show('riskBackdrop');
+  $('riskDialog').scrollTop = 0;
+  $('riskDialog').querySelector('.risk-ack')?.focus();
+}
+
+function closeRiskGate(runAction = false) {
+  hide('riskBackdrop');
+  const pending = pendingRiskAction;
+  pendingRiskAction = null;
+  riskAcknowledgements.clear();
+  if (runAction && pending?.action) pending.action();
+}
+
+document.querySelectorAll('.risk-ack').forEach((button, index) => {
+  button.addEventListener('click', () => {
+    riskAcknowledgements.add(index);
+    button.disabled = true;
+    button.classList.add('acknowledged');
+    button.textContent = '✓ Paham';
+    updateRiskProgress();
+  });
+});
+$('confirmRiskBtn').addEventListener('click', () => {
+  if (riskAcknowledgements.size !== 5) return;
+  closeRiskGate(true);
+});
+$('cancelRiskBtn').addEventListener('click', () => closeRiskGate(false));
+$('cancelRiskBottomBtn').addEventListener('click', () => closeRiskGate(false));
+$('riskBackdrop').addEventListener('click', event => {
+  if (event.target === $('riskBackdrop')) closeRiskGate(false);
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !$('riskBackdrop').classList.contains('hidden')) closeRiskGate(false);
+});
+
+async function refreshPlatformStates() {
+  const data = await api('/api/admin/platforms/status');
+  platformState.telegram = data.telegram || {};
+  platformState.whatsapp = data.whatsapp || {};
+  renderTelegramStatus(platformState.telegram);
+  renderWhatsAppStatus(platformState.whatsapp);
+}
+
+function renderTelegramStatus(status) {
+  if (!status) return;
+  const ready = Boolean(status.connected);
+  setPill('telegramStatus', ready ? 'TERHUBUNG' : (status.enabled ? 'MENUNGGU' : 'BELUM AKTIF'), ready ? 'good' : status.lastError ? 'bad' : 'wait');
+  $('telegramNote').textContent = ready
+    ? `Bot @${status.username || 'Telegram'} sedang menerima pesan pribadi.`
+    : status.lastError || (status.tokenSet ? 'Token tersimpan. Aktifkan bot untuk mulai menerima pesan.' : 'Token belum disimpan dan bot belum terhubung.');
+  $('telegramUsername').textContent = status.username ? `@${status.username}` : 'Belum terdeteksi';
+  if ($('telegramEnabled') && !$('telegramEnabled').dataset.dirty) $('telegramEnabled').checked = Boolean(status.enabled);
+}
+
+function renderWhatsAppStatus(status) {
+  if (!status) return;
+  const label = status.connected ? 'TERHUBUNG' : status.status === 'waiting-for-link' ? 'MENUNGGU TAUTAN' : status.enabled ? 'MENYAMBUNG' : 'BELUM DITAUTKAN';
+  setPill('whatsappStatus', label, status.connected ? 'good' : status.lastError ? 'bad' : 'wait');
+  $('whatsappNote').textContent = status.connected
+    ? 'Sesi WhatsApp aktif. Bot siap menerima pesan pribadi.'
+    : status.lastError || (status.status === 'waiting-for-link' ? 'Selesaikan tautan pada aplikasi WhatsApp di ponsel.' : 'Belum ada sesi WhatsApp yang aktif.');
+  $('whatsappAccount').textContent = status.displayName || status.phoneNumber || (status.connected ? 'Akun tertaut' : 'Belum terdeteksi');
+  if (status.pairingCode || status.qr) {
+    show('whatsappPairResult');
+    $('whatsappPairCode').textContent = status.pairingCode || 'Gunakan QR di samping';
+    if (status.qr) {
+      $('whatsappQr').src = status.qr;
+      show('whatsappQr');
     } else {
-      $('authTitle').textContent = 'Masuk ke konfigurasi';
-      $('authDescription').textContent = 'Masukkan password administrator DAFZZ.';
-      $('authHint').textContent = 'Lima percobaan gagal akan mengunci login selama 15 menit.';
-      $('authSubmit').textContent = 'Masuk';
-      $('setupTokenWrap').classList.add('hidden');
-      $('setupToken').required = false;
-      $('adminPassword').setAttribute('autocomplete', 'current-password');
+      $('whatsappQr').removeAttribute('src');
+      hide('whatsappQr');
     }
-    return;
+  } else if (!status.connected) {
+    hide('whatsappPairResult');
+  } else {
+    hide('whatsappPairResult');
   }
-  hide('authPanel'); show('dashboard');
-  await loadOverview();
 }
 
 async function loadOverview() {
@@ -82,15 +181,61 @@ async function loadOverview() {
   $('aiApiKey').value = '';
   $('clearAiApiKey').checked = false;
   setAIFields();
-  $('fallbackPrefix').value = s.fallbackPrefix;
-  $('webhookUrl').textContent = 'http://app:3000/webhooks/tiktok';
+  $('fallbackPrefix').value = s.fallbackPrefix || '';
+  $('webhookUrl').textContent = `${location.host}/webhooks/tiktok`;
   $('categoryRows').innerHTML = data.catalog.categories.map(category => `
     <article class="category-row"><strong>${escapeHtml(category.name)}</strong><span>${category.count} TOOLS</span></article>
   `).join('');
+  platformState.tiktok = data.platforms?.tiktok || {};
+  platformState.telegram = data.platforms?.telegram || platformState.telegram;
+  platformState.whatsapp = data.platforms?.whatsapp || platformState.whatsapp;
+  renderTelegramStatus(platformState.telegram);
+  renderWhatsAppStatus(platformState.whatsapp);
 }
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
+async function refreshState() {
+  const state = await api('/api/admin/state');
+  csrfToken = state.csrfToken;
+  if (!state.authenticated) {
+    show('authPanel'); hide('dashboard');
+    if (state.setupRequired) {
+      $('authTitle').textContent = 'Buat administrator';
+      $('authDescription').textContent = 'Buat password admin pertama untuk mengunci halaman konfigurasi.';
+      $('authHint').textContent = 'Password minimal 12 karakter. Simpan di tempat aman.';
+      $('authSubmit').textContent = 'Buat administrator';
+      $('setupTokenWrap').classList.toggle('hidden', !state.setupTokenRequired);
+      $('setupToken').required = Boolean(state.setupTokenRequired);
+      $('adminPassword').setAttribute('autocomplete', 'new-password');
+    } else {
+      $('authTitle').textContent = 'Masuk ke konfigurasi';
+      $('authDescription').textContent = 'Masukkan password administrator DAFZZ.';
+      $('authHint').textContent = 'Lima percobaan gagal akan mengunci login selama 15 menit.';
+      $('authSubmit').textContent = 'Masuk';
+      $('setupTokenWrap').classList.add('hidden');
+      $('setupToken').required = false;
+      $('adminPassword').setAttribute('autocomplete', 'current-password');
+    }
+    return;
+  }
+  hide('authPanel'); show('dashboard');
+  await loadOverview();
+  await refreshPlatformStates().catch(error => console.warn('[platform-status]', error.message));
+  const requestedPlatform = new URLSearchParams(location.hash.replace(/^#/, '')).get('platform');
+  if (['tiktok', 'telegram', 'whatsapp'].includes(requestedPlatform)) selectPlatform(requestedPlatform);
+}
+
+async function saveTikTokSettings(body) {
+  try {
+    await api('/api/admin/settings', { method: 'POST', body: JSON.stringify(body) });
+    $('bridgeApiToken').value = '';
+    $('webhookSecret').value = '';
+    $('aiApiKey').value = '';
+    $('clearAiApiKey').checked = false;
+    $('clearBridgeToken').checked = false;
+    $('clearWebhookSecret').checked = false;
+    setStatus('settingsStatus', 'Konfigurasi TikTok berhasil disimpan di server.');
+    await loadOverview();
+  } catch (error) { setStatus('settingsStatus', error.message, true); }
 }
 
 $('authForm').addEventListener('submit', async event => {
@@ -109,7 +254,7 @@ $('authForm').addEventListener('submit', async event => {
   } catch (error) { setStatus('authStatus', error.message, true); }
 });
 
-$('settingsForm').addEventListener('submit', async event => {
+$('settingsForm').addEventListener('submit', event => {
   event.preventDefault();
   const body = {
     bridgeBaseUrl: $('bridgeBaseUrl').value.trim(),
@@ -127,17 +272,71 @@ $('settingsForm').addEventListener('submit', async event => {
     clearAiApiKey: $('clearAiApiKey').checked,
     fallbackPrefix: $('fallbackPrefix').value.trim()
   };
+  const needsAcknowledgement = body.botEnabled && !platformState.tiktok?.riskAcceptedAt;
+  if (needsAcknowledgement) {
+    openRiskGate('TikTok', () => saveTikTokSettings({ ...body, riskAcknowledged: true }));
+  } else {
+    saveTikTokSettings(body);
+  }
+});
+
+$('telegramEnabled').addEventListener('change', () => { $('telegramEnabled').dataset.dirty = '1'; });
+
+$('telegramForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const enabled = $('telegramEnabled').checked;
+  const body = { token: $('telegramToken').value.trim(), enabled };
+  const save = async riskAcknowledged => {
+    setStatus('telegramFormStatus', enabled ? 'Menyimpan token dan mengaktifkan polling Telegram...' : 'Menyimpan pengaturan Telegram...');
+    try {
+      const data = await api('/api/admin/platforms/telegram/config', { method: 'POST', body: JSON.stringify({ ...body, riskAcknowledged }) });
+      $('telegramToken').value = '';
+      $('telegramEnabled').dataset.dirty = '';
+      setStatus('telegramFormStatus', data.telegram.connected ? `Terhubung sebagai @${data.telegram.username}.` : 'Pengaturan disimpan. Memulai koneksi Telegram...');
+      await refreshPlatformStates();
+    } catch (error) { setStatus('telegramFormStatus', error.message, true); }
+  };
+  if (enabled && !platformState.telegram?.riskAcceptedAt) openRiskGate('Telegram', () => save(true));
+  else save(false);
+});
+
+$('testTelegramBtn').addEventListener('click', async () => {
+  setStatus('telegramFormStatus', 'Memeriksa token ke Telegram...');
   try {
-    await api('/api/admin/settings', { method: 'POST', body: JSON.stringify(body) });
-    $('bridgeApiToken').value = '';
-    $('webhookSecret').value = '';
-    $('aiApiKey').value = '';
-    $('clearAiApiKey').checked = false;
-    $('clearBridgeToken').checked = false;
-    $('clearWebhookSecret').checked = false;
-    setStatus('settingsStatus', 'Konfigurasi berhasil disimpan di server.');
-    await loadOverview();
-  } catch (error) { setStatus('settingsStatus', error.message, true); }
+    const data = await api('/api/admin/platforms/telegram/test', { method: 'POST', body: JSON.stringify({ token: $('telegramToken').value.trim() }) });
+    setStatus('telegramFormStatus', `Token valid: @${data.bot.username || 'tanpa username'}. ${data.webhookActive ? 'Webhook lama terdeteksi; akan diganti ke polling saat bot diaktifkan.' : 'Polling siap digunakan.'}`);
+  } catch (error) { setStatus('telegramFormStatus', error.message, true); }
+});
+
+$('pairWhatsAppBtn').addEventListener('click', () => {
+  openRiskGate('WhatsApp', async () => {
+    setStatus('whatsappFormStatus', 'Memulai koneksi WhatsApp. Menyiapkan kode tautan atau QR...');
+    try {
+      const data = await api('/api/admin/platforms/whatsapp/pair', {
+        method: 'POST',
+        body: JSON.stringify({ phoneNumber: $('whatsappPhoneNumber').value.trim(), riskAcknowledged: true })
+      });
+      renderWhatsAppStatus(data.whatsapp);
+      setStatus('whatsappFormStatus', data.whatsapp.pairingCode ? 'Kode tautan sudah dibuat. Masukkan kode tersebut di WhatsApp.' : 'Koneksi dimulai. Jika QR belum terlihat, tekan Perbarui status.');
+      await refreshPlatformStates();
+    } catch (error) { setStatus('whatsappFormStatus', error.message, true); }
+  });
+});
+
+$('refreshWhatsAppBtn').addEventListener('click', async () => {
+  setStatus('whatsappFormStatus', 'Memeriksa status WhatsApp...');
+  try { await refreshPlatformStates(); setStatus('whatsappFormStatus', 'Status WhatsApp diperbarui.'); }
+  catch (error) { setStatus('whatsappFormStatus', error.message, true); }
+});
+
+$('logoutWhatsAppBtn').addEventListener('click', async () => {
+  if (!confirm('Hapus sesi WhatsApp yang tersimpan dan putuskan tautan dari server?')) return;
+  setStatus('whatsappFormStatus', 'Menghapus sesi WhatsApp...');
+  try {
+    await api('/api/admin/platforms/whatsapp/logout', { method: 'POST', body: '{}' });
+    await refreshPlatformStates();
+    setStatus('whatsappFormStatus', 'Sesi WhatsApp sudah dihapus.');
+  } catch (error) { setStatus('whatsappFormStatus', error.message, true); }
 });
 
 $('testBridgeBtn').addEventListener('click', async () => {
@@ -150,10 +349,10 @@ $('testBridgeBtn').addEventListener('click', async () => {
 });
 
 $('testAiBtn').addEventListener('click', async () => {
-  setStatus('settingsStatus', 'Menguji koneksi AI yang sedang dipilih...');
+  setStatus('settingsStatus', 'Menguji AI utama dan tiga layanan cadangan...');
   try {
     const data = await api('/api/admin/test-ai', { method: 'POST', body: '{}' });
-    setStatus('settingsStatus', `${data.note} ${data.answer}` , !data.ok);
+    setStatus('settingsStatus', `${data.note} ${data.answer}`, !data.ok);
   } catch (error) { setStatus('settingsStatus', error.message, true); }
 });
 
@@ -169,3 +368,8 @@ refreshState().catch(error => {
   $('authTitle').textContent = 'Panel belum siap';
   $('authDescription').textContent = error.message;
 });
+
+// Keep QR and pairing status current while the administrator is looking at the panel.
+setInterval(() => {
+  if (!$('dashboard').classList.contains('hidden')) refreshPlatformStates().catch(() => {});
+}, 4000);

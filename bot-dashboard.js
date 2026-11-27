@@ -2,6 +2,7 @@
 const $ = id => document.getElementById(id);
 let csrfToken = '';
 let currentBotEnabled = false;
+let currentTikTokRiskAccepted = false;
 let refreshTimer = null;
 
 async function api(url, options = {}) {
@@ -55,7 +56,13 @@ function renderOverview(data) {
   const bridge = data.bridge || {};
   const ai = data.ai || {};
   const storage = data.storage || {};
+  const platforms = data.platforms || {};
   currentBotEnabled = Boolean(bot.enabled);
+  currentTikTokRiskAccepted = Boolean(platforms.tiktok?.riskAcceptedAt);
+  const setPlatformTag = (id, label, kind) => { const node = $(id); if (!node) return; node.textContent = label; node.className = `platform-status-tag ${kind || ''}`; };
+  setPlatformTag('menuTikTokStatus', platforms.tiktok?.enabled ? 'BOT AKTIF' : 'BOT NONAKTIF', platforms.tiktok?.enabled ? 'good' : 'wait');
+  setPlatformTag('menuTelegramStatus', platforms.telegram?.connected ? 'TERHUBUNG' : platforms.telegram?.enabled ? 'MENUNGGU' : 'BELUM AKTIF', platforms.telegram?.connected ? 'good' : 'wait');
+  setPlatformTag('menuWhatsAppStatus', platforms.whatsapp?.connected ? 'TERHUBUNG' : platforms.whatsapp?.enabled ? 'MENYAMBUNG' : 'BELUM DITAUTKAN', platforms.whatsapp?.connected ? 'good' : 'wait');
 
   $('metricReceived').textContent = number(stats.received);
   $('metricReplied').textContent = number(stats.replied);
@@ -91,7 +98,7 @@ function renderOverview(data) {
     ? 'AI fallback dimatikan. Pesan yang tidak cocok tidak akan mendapat jawaban AI.'
     : ai.mode === 'custom'
       ? `Mode API manual aktif. API key ${ai.apiKeySet ? 'tersimpan di server' : 'belum diisi'}.`
-      : 'Mode otomatis Pollinations, menggunakan endpoint yang dipakai website DAFZZ AI v3.0.';
+      : 'Mode otomatis: Pollinations lalu Kilo, LLM7, dan AI Horde sebagai cadangan gratis tanpa API key pengguna. Kuota dan waktu antre bisa berubah.';
 
   renderLogs(data.logs);
   $('lastRefresh').textContent = `Diperbarui ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} · pembaruan otomatis 15 detik`;
@@ -122,6 +129,10 @@ async function initialize() {
 }
 
 $('botToggle').addEventListener('click', async () => {
+  if (!currentBotEnabled && !currentTikTokRiskAccepted) {
+    window.location.href = '/admin#platform=tiktok';
+    return;
+  }
   $('botToggle').disabled = true;
   $('botToggle').textContent = 'Menyimpan...';
   try {

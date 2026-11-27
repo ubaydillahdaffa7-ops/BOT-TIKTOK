@@ -17,12 +17,19 @@ const DEFAULTS = {
     aiModel: 'openai',
     aiApiKey: '',
     fallbackPrefix: 'Maaf kamu ngetik apa mpruy',
-    publicBaseUrl: process.env.APP_PUBLIC_URL || ''
+    publicBaseUrl: process.env.APP_PUBLIC_URL || '',
+    telegramBotToken: '',
+    telegramUpdateOffset: 0,
+    platforms: {
+      tiktok: { riskAcceptedAt: null },
+      telegram: { enabled: false, riskAcceptedAt: null },
+      whatsapp: { enabled: false, riskAcceptedAt: null }
+    }
   },
   sessions: {},
   downloads: {},
   processedEvents: {},
-  stats: { received: 0, replied: 0, aiReplies: 0, toolLinks: 0, outputs: 0 },
+  stats: { received: 0, replied: 0, aiReplies: 0, toolLinks: 0, outputs: 0, byPlatform: { tiktok: 0, whatsapp: 0, telegram: 0 } },
   logs: []
 };
 
@@ -35,10 +42,13 @@ export async function initStore() {
     const stored = JSON.parse(await fs.readFile(DB_FILE, 'utf8'));
     db = {
       ...structuredClone(DEFAULTS), ...stored,
-      settings: { ...DEFAULTS.settings, ...(stored.settings || {}) },
-      stats: { ...DEFAULTS.stats, ...(stored.stats || {}) },
+      settings: { ...DEFAULTS.settings, ...(stored.settings || {}), platforms: { ...DEFAULTS.settings.platforms, ...(stored.settings?.platforms || {}) } },
+      stats: { ...DEFAULTS.stats, ...(stored.stats || {}), byPlatform: { ...DEFAULTS.stats.byPlatform, ...(stored.stats?.byPlatform || {}) } },
       logs: Array.isArray(stored.logs) ? stored.logs.slice(0, 120) : []
     };
+    for (const platform of ['tiktok', 'telegram', 'whatsapp']) {
+      db.settings.platforms[platform] = { ...DEFAULTS.settings.platforms[platform], ...(stored.settings?.platforms?.[platform] || {}) };
+    }
     // Migrate the previous OVH/Qwen anonymous-AI defaults to the Pollinations
     // configuration requested for this build. Custom mode is explicit.
     if (!stored.settings?.aiMode && String(stored.settings?.aiEndpoint || '').includes('ovh.endpoints')) {

@@ -38,3 +38,27 @@
 @media(max-width:650px){.topbar nav{gap:4px}.topbar .config-nav-link{gap:4px;padding:7px 6px;font-size:8px}.topbar .config-nav-link svg{width:15px;height:15px}}
 @media(max-width:390px){.topbar .config-nav-link span{display:none}.topbar .config-nav-link{width:31px;height:31px;justify-content:center;padding:6px}.topbar .config-nav-link svg{width:17px;height:17px}}
 @media(prefers-reduced-motion:reduce){.topbar .config-nav-link{transition:none!important}}
+
+
+/* Three platform setup cards on the main Bot menu. */
+.bot-platform-section{margin-top:34px}
+.bot-platform-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.bot-platform-card{position:relative;display:flex;flex-direction:column;min-width:0;min-height:215px;padding:19px;border:1px solid #294966;border-radius:11px;background:linear-gradient(145deg,#112842,#091726);color:#edf6ff;text-decoration:none;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.bot-platform-card:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#168bff,#9bdcff70,transparent)}
+.bot-platform-card:after{content:"";position:absolute;width:130px;height:130px;right:-75px;bottom:-88px;border:1px solid #328ed025;border-radius:50%;box-shadow:0 0 0 14px #168bff08,0 0 0 28px #168bff05;pointer-events:none}
+.bot-platform-card:hover{transform:translateY(-3px);border-color:#4a94c5;box-shadow:0 14px 30px #0004,0 0 20px #168bff15}
+.bot-platform-id{color:#6389ac;font:8px ui-monospace,monospace;letter-spacing:.15em}
+.bot-platform-mark{display:grid;place-items:center;width:39px;height:39px;margin:16px 0 11px;border:1px solid #3976a2;border-radius:9px;background:#102c47;color:#a4dbff;font:800 12px 'Space Grotesk',sans-serif}
+.bot-platform-mark.tg{border-color:#316fa0;color:#81caff}.bot-platform-mark.wa{border-color:#28765e;background:#0e2b29;color:#73ddb0}
+.bot-platform-card>strong{font:650 18px 'Space Grotesk',Inter,sans-serif;letter-spacing:-.03em}
+.bot-platform-card>p{min-height:42px;color:#8ca7c1;font-size:10px;line-height:1.65;margin:7px 0 16px}
+.bot-platform-link{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:10px;border-top:1px solid #203c56;color:#8fcfff;font-size:9px;font-weight:750}
+.bot-platform-link b{font-size:15px;transition:transform .18s}.bot-platform-card:hover .bot-platform-link b{transform:translateX(4px)}
+@media(max-width:850px){.bot-platform-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.bot-platform-grid{grid-template-columns:1fr;gap:9px}.bot-platform-card{min-height:190px;padding:16px}.bot-platform-card>strong{font-size:16px}.bot-platform-card>p{min-height:auto}.bot-platform-mark{margin:12px 0 9px}}
+@media(prefers-reduced-motion:reduce){.bot-platform-card,.bot-platform-link b{transition:none!important}}
+
+.platform-status-tag{display:inline-flex;align-self:flex-start;margin:0 0 8px;padding:5px 8px;border:1px solid #31516c;border-radius:5px;background:#0a1b2b;color:#88a4bd;font:8px ui-monospace,monospace;letter-spacing:.1em}
+.platform-status-tag.good{border-color:#2b7058;background:#0e2a24;color:#88dfbb}
+.platform-status-tag.wait{border-color:#725e39;background:#2a2417;color:#edcb83}
+.platform-status-tag.bad{border-color:#76434c;background:#2c1820;color:#ffabb6}

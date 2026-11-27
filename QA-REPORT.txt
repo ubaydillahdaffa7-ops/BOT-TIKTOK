@@ -17,10 +17,10 @@ FITUR YANG DITAMBAHKAN
 - 50 Bot Commands tambahan tersimpan di bot-commands.js dan terhubung ke webhook TikTok.
 - Seluruh 50 AI/Local Tools baru memiliki properti perintah .slug dan dapat dijalankan langsung di DM.
 - Navigasi Tools, Bot TT, dan Lanjutan menggunakan ikon SVG serta efek hover/tekan ringan.
-- Panel konfigurasi admin diselaraskan dengan gaya visual Menu Bot TT: hero besar, garis aksen, kartu statistik bercahaya halus, panel koneksi, input fokus, dan animasi sentuh ringan.
+- Panel konfigurasi admin diperbarui dengan hero, garis aksen, kartu statistik, panel koneksi, dan animasi ringan yang konsisten dengan Menu Bot.
 - Metadata Open Graph/Twitter dan gambar preview PNG 1200x630 ditambahkan untuk pratinjau link saat website dibagikan.
-- AI fallback memiliki satu provider utama dan tiga gateway cadangan tanpa API key yang dicoba berurutan; timeout per provider dibatasi 12 detik.
-- Dashboard Bot TT dipertahankan dengan penyesuaian jumlah katalog dan efek kontrol ringan.
+- AI fallback memiliki Pollinations sebagai provider utama, disusul Kilo Auto Free, LLM7 anonim, dan AI Horde anonim. Timeout tiap gateway dibatasi; ketersediaan tidak dijamin.
+- Dashboard Menu Bot menampilkan tiga kartu konfigurasi TikTok, Telegram, dan WhatsApp, serta status koneksi.
 
 KETERANGAN BOT COMMANDS
 -----------------------
@@ -33,9 +33,11 @@ PENGUJIAN
 ---------
 - Pemeriksaan sintaks semua modul JavaScript melalui npm run check.
 - Unit test katalog: 401 entri, 401 slug unik, 300 tools lama tetap terbagi 6 x 50, dan grup baru 1 + 50 + 50.
-- Uji 50 nama Bot Commands unik, 25 handler AI, dan eksekusi 25 Local Tools dari DM.
+- Uji 50 nama Bot Commands unik, 25 handler AI, dan eksekusi 25 Local Tools dari chat.
 - Uji command lokal .choose, .sentence-counter, .extract-hashtags, .json-to-typescript, batas .pin, pesan batasan media .s, serta penolakan alias utility duplikat .calc.
-- Uji helper tanda tangan webhook, sanitasi nama file, validasi URL admin, konfigurasi AI otomatis Pollinations dan AI manual, serta urutan failover tiga gateway cadangan (mock test).
+- Uji helper tanda tangan webhook, sanitasi nama file, validasi URL admin, konfigurasi AI otomatis Pollinations dan AI manual, serta urutan fallback Kilo/LLM7/AI Horde (mock test).
+- Uji dispatcher bersama `.menu` melalui Telegram dan WhatsApp, uji perintah `.ai` pada kedua platform, dan uji pencegahan pesan duplikat.
+- Uji tiga menu konfigurasi, lima tombol Paham, detail Info Admin, dan metadata preview Open Graph.
 
 BELUM DIUJI
 -----------
@@ -45,7 +47,7 @@ BELUM DIUJI
 - Layanan API eksternal command tidak dipanggil satu per satu saat build karena memerlukan internet dan dapat terkena rate limit.
 - Tidak diuji dengan akun TikTok nyata, DM live, atau webhook live karena memerlukan sesi akun pemilik.
 - Tidak diuji end-to-end pada Android dan desktop.
-- Runtime server dan image Docker tidak dijalankan dalam proses pengemasan ZIP.
+- Runtime server dan image Docker tidak dijalankan dalam proses pengemasan ZIP. Instalasi npm penuh tidak dapat diselesaikan di lingkungan build ini karena pengambilan paket eksternal tidak tersedia; Dockerfile/Render akan memasang dependensi dari package.json.
 
 BATASAN CONNECTOR TIKTOK
 ------------------------
@@ -53,6 +55,18 @@ Konektor pihak ketiga yang digunakan tidak resmi dan eksperimental. Dokumentasi 
 
 STATUS
 ------
-Build telah melewati pemeriksaan sintaks dan unit test lokal yang tercantum di atas. Hasil ini bukan jaminan bebas bug atau siap produksi. Pengujian pada server, akun TikTok, dan bridge milik pengguna tetap diperlukan.
+Build telah melewati 17/17 unit test lokal dan pemeriksaan sintaks seluruh modul JavaScript utama. Hasil ini bukan jaminan bebas bug atau siap produksi. Pengujian pada server, akun TikTok, dan bridge milik pengguna tetap diperlukan.
 
 Arsip ZIP memiliki satu folder proyek utama dan seluruh file aplikasi tersimpan di dalamnya. Jumlah file proyek pada arsip revisi ini lebih dari 37 file.
+
+
+PENAMBAHAN VERSI KONFIGURASI 3 PLATFORM (27 NOV 2026)
+- Tambahan konektor Telegram Bot API menggunakan long polling.
+- Tambahan konektor WhatsApp Baileys dengan pairing code/QR dan penyimpanan sesi lokal.
+- Mesin pesan bersama digunakan oleh TikTok, Telegram, dan WhatsApp; sesi tool mencatat platform asal agar hasil kembali ke chat yang benar.
+- Lima persetujuan risiko diwajibkan pada antarmuka sebelum mengaktifkan/menautkan platform.
+- Status token dan sesi hanya ditampilkan sebagai status, bukan nilai rahasia.
+- Tombol D membuka Info Admin pada beranda, dashboard bot, dan konfigurasi.
+- Tambahan tiga gateway AI anonim sebagai fallback setelah Pollinations: Kilo, LLM7, dan AI Horde.
+
+Batas pengujian: koneksi langsung ke akun TikTok, Telegram, WhatsApp, dan provider AI tidak dapat dilakukan dari lingkungan build. Semua koneksi pihak ketiga harus diuji sesudah deploy dengan kredensial milik pengguna. Baileys tidak resmi dan rentan perubahan protokol WhatsApp Web.

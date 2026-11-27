@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { verifyTikTokBridgeSignature, safeFileName, isValidHttpUrl } from './security.js';
-import { getCatalogStats, findCatalogTool } from './bot.js';
+import { getCatalogStats, findCatalogTool, handleExternalMessage } from './bot.js';
 import { BOT_COMMANDS, AI_LOCAL_BOT_COMMANDS, AI_TOOL_COMMANDS, LOCAL_AI_TOOL_COMMANDS, handleBotCommand } from './bot-commands.js';
 import { askFreeAI, resolveAIConfiguration } from './ai.js';
-import { getDb } from './store.js';
+import { getDb, initStore, persist } from './store.js';
+
+await initStore();
 
 const catalog = JSON.parse(fs.readFileSync(new URL('./tools.json', import.meta.url), 'utf8'));
 
@@ -90,7 +92,7 @@ test('50 Bot Commands are unique and new commands work without duplicating old u
   assert.match(pin.reply, /maksimal 10/);
   assert.match(pin.reply, /upload.wikimedia.org\/example.png/);
   const sticker = await handleBotCommand('.s');
-  assert.match(sticker.reply, /hanya mendukung pesan teks/);
+  assert.match(sticker.reply, /memproses teks/);
   assert.equal(await handleBotCommand('.calc 2+2'), null);
   const count = await handleBotCommand('.sentence-counter Satu. Dua!');
   assert.match(count.reply, /Jumlah kalimat: 2/);
@@ -127,6 +129,130 @@ test('25 Local Tools kategori tujuh memiliki handler DM yang dapat dijalankan', 
     assert.ok(result && result.type === 'local-tool' && result.reply.length > 0, `.${slug} must execute`);
     assert.doesNotMatch(result.reply, /belum memiliki handler/i);
   }
+});
+
+
+test('Telegram and WhatsApp share the same 401-tool menu and platform-aware session dispatcher', async () => {
+  const settings = getDb().settings;
+  const previous = {
+    telegram: { ...settings.platforms.telegram },
+    whatsapp: { ...settings.platforms.whatsapp }
+  };
+  const originalStats = JSON.parse(JSON.stringify(getDb().stats));
+  const replies = [];
+  const sender = async (chatId, text, key) => replies.push({ chatId, text, key });
+  settings.platforms.telegram.enabled = true;
+  settings.platforms.whatsapp.enabled = true;
+  try {
+    const telegram = await handleExternalMessage({
+      platform: 'telegram', conversationId: 'tg-chat-1', senderId: 'tg-user-1',
+      messageId: 'qa:telegram:menu', text: '.menu'
+    }, sender);
+    const whatsapp = await handleExternalMessage({
+      platform: 'whatsapp', conversationId: '6281234567890@s.whatsapp.net', senderId: '6281234567890@s.whatsapp.net',
+      messageId: 'qa:whatsapp:menu', text: '.menu'
+    }, sender);
+    assert.equal(telegram.type, 'menu');
+    assert.equal(whatsapp.type, 'menu');
+    assert.equal(replies.length, 2);
+    assert.match(replies[0].text, /401 ENTRI - 7 KATEGORI/);
+    assert.match(replies[1].text, /401 ENTRI - 7 KATEGORI/);
+    assert.equal(replies[0].chatId, 'tg-chat-1');
+    assert.equal(replies[1].chatId, '6281234567890@s.whatsapp.net');
+    const duplicate = await handleExternalMessage({
+      platform: 'telegram', conversationId: 'tg-chat-1', senderId: 'tg-user-1',
+      messageId: 'qa:telegram:menu', text: '.menu'
+    }, sender);
+    assert.equal(duplicate.ignored, 'duplicate_message');
+    assert.equal(replies.length, 2);
+  } finally {
+    settings.platforms.telegram = previous.telegram;
+    settings.platforms.whatsapp = previous.whatsapp;
+    getDb().stats = originalStats;
+    delete getDb().processedEvents['qa:telegram:menu'];
+    delete getDb().processedEvents['qa:whatsapp:menu'];
+    await persist();
+  }
+});
+
+
+test('the .ai command is routed through the shared dispatcher for Telegram and WhatsApp', async () => {
+  const settings = getDb().settings;
+  const previous = {
+    telegram: { ...settings.platforms.telegram },
+    whatsapp: { ...settings.platforms.whatsapp },
+    aiEnabled: settings.aiEnabled,
+    aiMode: settings.aiMode,
+    fallbackPrefix: settings.fallbackPrefix
+  };
+  const previousFetch = globalThis.fetch;
+  const replies = [];
+  settings.platforms.telegram.enabled = true;
+  settings.platforms.whatsapp.enabled = true;
+  settings.aiEnabled = true;
+  settings.aiMode = 'pollinations';
+  globalThis.fetch = async url => {
+    assert.equal(String(url), 'https://text.pollinations.ai/openai');
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Jawaban AI DAFZZ untuk chat ini.' } }] }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  try {
+    const sender = async (chatId, text, key) => replies.push({ chatId, text, key });
+    const telegram = await handleExternalMessage({
+      platform: 'telegram', conversationId: 'tg-chat-ai', senderId: 'tg-user-ai',
+      messageId: 'qa:telegram:ai', text: '.ai halo'
+    }, sender);
+    const whatsapp = await handleExternalMessage({
+      platform: 'whatsapp', conversationId: '628000000000@s.whatsapp.net', senderId: '628000000000@s.whatsapp.net',
+      messageId: 'qa:whatsapp:ai', text: '.ai halo'
+    }, sender);
+    assert.equal(telegram.type, 'bot-command');
+    assert.equal(whatsapp.type, 'bot-command');
+    assert.equal(replies.length, 2);
+    assert.ok(replies.every(item => item.text === 'Jawaban AI DAFZZ untuk chat ini.'));
+  } finally {
+    globalThis.fetch = previousFetch;
+    settings.platforms.telegram = previous.telegram;
+    settings.platforms.whatsapp = previous.whatsapp;
+    settings.aiEnabled = previous.aiEnabled;
+    settings.aiMode = previous.aiMode;
+    settings.fallbackPrefix = previous.fallbackPrefix;
+    delete getDb().processedEvents['qa:telegram:ai'];
+    delete getDb().processedEvents['qa:whatsapp:ai'];
+    await persist();
+  }
+});
+
+
+test('the configuration UI has three bot menus, five separate Paham acknowledgements, and the requested admin details', () => {
+  const admin = fs.readFileSync(new URL('./admin.html', import.meta.url), 'utf8');
+  const home = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+  const bot = fs.readFileSync(new URL('./bot.html', import.meta.url), 'utf8');
+  const adminJs = fs.readFileSync(new URL('./admin.js', import.meta.url), 'utf8');
+  assert.equal((admin.match(/<button class="platform-choice/g) || []).length, 3);
+  assert.equal((admin.match(/class="risk-item"/g) || []).length, 5);
+  assert.equal((admin.match(/class="risk-ack"/g) || []).length, 5);
+  assert.match(adminJs, /riskAcknowledgements\.size !== 5/);
+  assert.match(adminJs, /confirmRiskBtn'\)\.disabled = count !== 5/);
+  for (const page of [home, bot, admin]) {
+    assert.match(page, /id="adminInfoDialog"/);
+    assert.match(page, /ubaydillahdaffa7@gmail\.com/);
+    assert.match(page, /portofolio-dafzz-stlr\.onrender\.com/);
+    assert.match(page, /belajar-si-qjko\.onrender\.com/);
+    assert.match(page, /root_403_access/);
+  }
+});
+
+test('share preview metadata points to the included 1200x630 PNG image', () => {
+  const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+  const image = fs.readFileSync(new URL('./og-preview.png', import.meta.url));
+  assert.match(html, /property="og:title"/);
+  assert.match(html, /property="og:description"/);
+  assert.match(html, /property="og:image"/);
+  assert.equal(image.toString('hex', 0, 8), '89504e470d0a1a0a');
+  assert.equal(image.readUInt32BE(16), 1200);
+  assert.equal(image.readUInt32BE(20), 630);
 });
 
 test('webhook HMAC accepts valid signature and rejects stale or altered bodies', () => {
@@ -230,27 +356,49 @@ test('manual AI fallback sends the API key only as a server-side bearer header',
   }
 });
 
-test('automatic AI tries three keyless backup gateways after the primary fails', async () => {
+test('automatic AI tries three anonymous backup gateways after Pollinations fails', async () => {
   const settings = getDb().settings;
   const previousSettings = { ...settings };
   const previousFetch = globalThis.fetch;
   const attempted = [];
+  const attemptedOptions = [];
   Object.assign(settings, { aiEnabled: true, aiMode: 'pollinations', fallbackPrefix: 'DAFZZ:' });
-  globalThis.fetch = async (url) => {
-    attempted.push(String(url));
-    if (attempted.length < 4) return new Response('temporary unavailable', { status: 503 });
-    return new Response(JSON.stringify({ choices: [{ message: { content: 'Jawaban dari AI cadangan ketiga.' } }] }), {
-      status: 200, headers: { 'Content-Type': 'application/json' }
-    });
+  globalThis.fetch = async (url, options = {}) => {
+    const address = String(url);
+    attempted.push(address);
+    attemptedOptions.push(options);
+    if (address === 'https://api.llm7.io/v1/models') {
+      return new Response(JSON.stringify({ data: [{ id: 'gpt-oss:20b', usage_based_only: false }] }), {
+        status: 200, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    if (address === 'https://oai.aihorde.net/v1/models') {
+      return new Response(JSON.stringify({ data: [{ id: 'horde/test-instruct-model' }] }), {
+        status: 200, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    if (address.endsWith('/v1/chat/completions')) {
+      if (address.includes('oai.aihorde.net')) {
+        return new Response(JSON.stringify({ choices: [{ message: { content: 'Jawaban dari AI Horde anonim.' } }] }), {
+          status: 200, headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      return new Response('temporary unavailable', { status: 503 });
+    }
+    return new Response('temporary unavailable', { status: 503 });
   };
   try {
     const answer = await askFreeAI('Uji failover AI');
-    assert.equal(attempted.length, 4);
     assert.equal(attempted[0], 'https://text.pollinations.ai/openai');
-    assert.equal(attempted[1], 'https://api.jarvisclaw.ai/v1/chat/completions');
-    assert.equal(attempted[2], 'https://api.free.ai/v1/chat/completions');
-    assert.equal(attempted[3], 'https://api.kilo.ai/api/gateway/chat/completions');
-    assert.match(answer, /Jawaban dari AI cadangan ketiga/);
+    assert.equal(attempted[1], 'https://ai-gateway.kilo.ai/api/v1/chat/completions');
+    assert.equal(attempted[2], 'https://api.llm7.io/v1/models');
+    assert.equal(attempted[3], 'https://api.llm7.io/v1/chat/completions');
+    assert.equal(attempted[4], 'https://oai.aihorde.net/v1/models');
+    assert.equal(attempted[5], 'https://oai.aihorde.net/v1/chat/completions');
+    assert.equal(attemptedOptions[1].headers?.Authorization, undefined);
+    assert.equal(attemptedOptions[3].headers?.Authorization, undefined);
+    assert.equal(attemptedOptions[5].headers?.Authorization, 'Bearer 0000000000');
+    assert.match(answer, /Jawaban dari AI Horde anonim/);
   } finally {
     globalThis.fetch = previousFetch;
     Object.assign(settings, previousSettings);

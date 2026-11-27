@@ -10,7 +10,7 @@ services:
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
       SESSION_SECRET: ${SESSION_SECRET:-}
       ADMIN_SETUP_TOKEN: ${ADMIN_SETUP_TOKEN:-}
-      TIKTOK_BRIDGE_URL: http://tiktok-bridge:8000
+      TIKTOK_BRIDGE_URL: ${TIKTOK_BRIDGE_URL:-http://tiktok-bridge:8000}
       TRUST_PROXY: "1"
     volumes:
       - dafzz-data:/app/.data

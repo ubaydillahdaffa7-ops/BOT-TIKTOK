@@ -1,15 +1,15 @@
-# DAFZZ TikTok Bot
+# DAFZZ Multi-Platform Bot
 
-Paket gabungan DAFZZ-TOOLS, backend bot TikTok, panel konfigurasi, halaman pemrosesan file, dan halaman unduhan.
+Paket gabungan DAFZZ-TOOLS, backend bot TikTok, Telegram, WhatsApp, panel konfigurasi, halaman pemrosesan file, dan halaman unduhan.
 
 ## Isi paket
 
 - file frontend di folder utama berisi website DAFZZ-TOOLS dari sumber pengguna, dengan tema dan navigasi aslinya tetap dipakai.
 - `tools.json` adalah katalog sumber: 401 entri. Enam kategori lama tetap memiliki 50 tools per kategori; kategori ke-7 berisi 1 Chat AI unggulan, 50 AI/Local Tools, dan 50 Bot Commands.
-- `admin.html` dan `admin.js` adalah panel konfigurasi bergaya DAFZZ.
-- `bot.html`, `bot.css`, dan `bot-dashboard.js` menyediakan dashboard Menu Bot TT dengan status bot, statistik, koneksi, penyimpanan, AI, dan log aktivitas.
-- `bot-commands.js` menyimpan kode 50 Bot Commands tambahan serta handler DM untuk seluruh 25 AI Tools dan 25 Local Tools baru.
-- file `server.js`, `bot.js`, `store.js`, `security.js`, `ai.js` berisi backend, pengelolaan sesi, webhook TikTok, penyimpanan sementara, dan AI fallback.
+- `admin.html`, `admin.css`, dan `admin.js` adalah panel konfigurasi bergaya DAFZZ dengan tiga menu terpisah: TikTok, Telegram, dan WhatsApp.
+- `bot.html`, `bot.css`, dan `bot-dashboard.js` menyediakan dashboard Menu Bot dengan status TikTok, Telegram, WhatsApp, statistik, penyimpanan, AI, dan log aktivitas.
+- `bot-commands.js` menyimpan kode 50 Bot Commands tambahan serta handler chat untuk seluruh 25 AI Tools dan 25 Local Tools baru.
+- file `server.js`, `bot.js`, `connectors.js`, `store.js`, `security.js`, `ai.js` berisi backend bersama, webhook TikTok, polling Telegram, konektor WhatsApp Baileys, penyimpanan, dan AI fallback. `admin-info.js` mengaktifkan panel Info Admin pada ikon D.
 - `docker-compose.yml` menjalankan aplikasi DAFZZ dan TikTok DM bridge dalam jaringan privat.
 - file `setup.sh`, `setup.ps1`, `import-tiktok-session.sh`, `import-tiktok-session.ps1` berisi skrip instalasi awal dan impor sesi TikTok.
 
@@ -17,12 +17,12 @@ Paket gabungan DAFZZ-TOOLS, backend bot TikTok, panel konfigurasi, halaman pemro
 
 1. Perintah `.menu`, `.help`, `.start`, `.info`, dan `.cancel`.
 2. Perintah kategori `.ai-bot`, `.foto`, `.teks`, `.file`, `.konverter`, `.keamanan`, dan `.web`.
-3. Seluruh slug tools lama tetap dapat dipanggil dengan awalan titik dan membuka sesi tool website. Seluruh 50 AI/Local Tools baru juga dapat dipanggil langsung dari DM, misalnya `.ai-story ide cerita`, `.sentence-counter teks`, atau `.json-to-typescript {\"nama\":\"DAFZZ\"}`.
+3. Seluruh slug tools lama tetap dapat dipanggil dengan awalan titik dan membuka sesi tool website. Seluruh 50 AI/Local Tools baru juga dapat dipanggil langsung dari chat bot, misalnya `.ai-story ide cerita`, `.sentence-counter teks`, atau `.json-to-typescript {\"nama\":\"DAFZZ\"}`.
 4. Kode untuk 50 Bot Commands dan 50 AI/Local Tools baru dikumpulkan dalam `bot-commands.js`. Tool AI memanggil AI sisi server yang sama; tool lokal diproses di bot tanpa API key. Tombol katalog menyiapkan teks perintah agar mudah disalin.
-5. Saat fungsi website menghasilkan file atau teks melalui fungsi hasil standar DAFZZ, hasil dikirim ke server. Server menyimpan file sementara selama 24 jam dan mencoba membalas DM TikTok dengan tautan unduhan.
+5. Saat fungsi website menghasilkan file atau teks melalui fungsi hasil standar DAFZZ, hasil dikirim ke server. Server menyimpan file sementara selama 24 jam dan mengirim tautan unduhan kembali ke platform chat asal.
 6. Panel admin memiliki pengaturan token bridge, webhook secret, alamat publik, kontrol bot ON/OFF, dan AI fallback.
-7. Menu Bot TT menampilkan statistik DM, balasan bot/AI, sesi tool, status bridge/webhook, penyimpanan, dan log aktivitas.
-8. Pesan yang bukan perintah diarahkan ke Pollinations AI melalui endpoint yang dipakai website DAFZZ AI v3.0. Jika gagal, sistem mencoba tiga gateway AI cadangan tanpa API key secara berurutan (JarvisClaw Free, Free.ai, dan Kilo Gateway Free). Mode AI manual juga tersedia untuk endpoint OpenAI-compatible dan API key milik pengguna; jika endpoint manual gagal, tiga gateway cadangan tetap dicoba. Awalan balasan bawaan adalah `Maaf kamu ngetik apa mpruy`.
+7. Menu Bot menampilkan tiga pintu konfigurasi, statistik pesan, balasan bot/AI, sesi tool, status koneksi, penyimpanan, dan log aktivitas.
+8. Perintah `.ai pertanyaan` dan pesan yang tidak dikenali diarahkan ke Pollinations. Jika gagal, sistem mencoba Kilo Auto Free, LLM7 anonim, lalu AI Horde anonim. Mode AI manual juga tersedia; jika endpoint manual gagal, tiga gateway cadangan tetap dicoba. Tidak ada jaminan kuota atau uptime layanan gratis.
 9. Sesi tool dan tautan unduhan memiliki masa berlaku 24 jam. File sementara dibersihkan secara berkala.
 
 ## Batasan integrasi TikTok yang perlu dibaca
@@ -31,7 +31,7 @@ Konektor dalam paket ini menggunakan proyek pihak ketiga `KreatixTeam/tiktok-dm-
 
 Menurut dokumentasi upstream saat paket ini dibuat, konektor hanya membaca dan mengirim pesan teks pada percakapan satu lawan satu yang sudah ada. Konektor belum mendukung login QR, pembaruan sesi otomatis, permintaan DM baru, grup, pengiriman atau penerimaan media, dan pesan ke username sembarang. Akun yang belum mempunyai percakapan yang sesuai tidak bisa dihubungi melalui endpoint ini. Pengiriman dapat berstatus `unknown` bila konfirmasi tidak tersedia.
 
-Karena DM TikTok tidak dapat membawa file PDF/Word melalui bridge ini, pengguna membuka halaman DAFZZ untuk memilih file dan menjalankan tool. Pemrosesan yang memang dibuat lokal oleh website tetap berlangsung di browser; hasilnya dikirim sementara ke server agar bot dapat mengirim tautan unduhan. File yang dikirim langsung sebagai lampiran DM TikTok belum bisa diproses.
+Karena konektor chat saat ini berfokus pada teks, pengguna membuka halaman DAFZZ untuk memilih file dan menjalankan tool. Pemrosesan yang memang dibuat lokal oleh website tetap berlangsung di browser; hasilnya dikirim sementara ke server agar tautan unduhan dapat dikirim kembali ke chat asal. Pengiriman lampiran langsung lewat chat belum diaktifkan.
 
 Sambungan ini bukan jaminan stabilitas. Perubahan protokol TikTok, autentikasi ulang, pembatasan akun, atau perubahan bridge dapat membuat bot berhenti menerima/mengirim DM.
 
@@ -142,25 +142,41 @@ Jangan pernah menempelkan `inbox.fetch`, `socket.fetch`, API token, webhook secr
 
 Sistem ini tidak membuat alur tanya-jawab berbeda untuk setiap parameter secara otomatis. Website sumber tetap meminta input melalui kontrolnya sendiri, termasuk unggahan file, ukuran, teks, pilihan, dan parameter lain. Validasi tiap tool mengikuti implementasi aslinya.
 
-## AI otomatis Pollinations dan AI manual
+## AI otomatis Pollinations dan tiga cadangan gratis
 
-Mode AI bawaan menggunakan endpoint OpenAI-compatible Pollinations yang sudah dipakai pada website DAFZZ AI v3.0. Jika gagal, server mencoba tiga gateway gratis tanpa API key secara berurutan: JarvisClaw Free (`api.jarvisclaw.ai`, model `auto/free`), Free.ai (`api.free.ai`, model `deepseek-r1`), dan Kilo Gateway Free (`api.kilo.ai`, model `kilo-auto/free`). Setiap layanan memiliki batas penggunaan dan ketersediaan yang dapat berubah; ini bukan jaminan AI selalu online. Endpoint utama:
+Mode otomatis memakai endpoint legacy Pollinations yang saat ini dipakai website DAFZZ. Jika gagal, server mencoba secara berurutan:
 
-- Endpoint: `https://text.pollinations.ai/openai`
-- Model alias: `openai`
-- Tidak mengirim API key dari aplikasi pada mode otomatis.
+1. Kilo AI Gateway `kilo-auto/free` — model gratis yang dapat digunakan tanpa API key milik pengguna.
+2. LLM7 — akses anonim tanpa token; ketersediaan model dan batas keyless dapat berubah.
+3. AI Horde — memakai identitas anonim bawaan `0000000000`; pengguna anonim memiliki prioritas antrean paling rendah.
 
-Jika layanan legacy tersebut berubah, membatasi akses, atau tidak tersedia, bot memberikan jawaban cadangan dan mencatat kegagalan pada log. Ketersediaan/kuota layanan eksternal tidak dijamin.
+Perintah chat: `.ai pertanyaan kamu`. AI juga menjadi fallback untuk pesan yang bukan perintah. Tidak ada gateway gratis yang menjamin selalu online atau tidak berubah. Jangan kirim password, OTP, token, cookie, atau data rahasia ke AI pihak ketiga. Kilo memperingatkan bahwa rute gratis dapat menggunakan provider hulu yang menyimpan prompt atau hasil.
 
-Panel `/admin` juga menyediakan mode AI manual. Administrator dapat memasukkan endpoint HTTPS OpenAI-compatible, nama model, dan API key penyedia sendiri. API key disimpan hanya di sisi server di file data privat; API overview tidak mengirim nilai key ke browser. Dokumentasi Pollinations saat ini juga menjelaskan API generasi baru di `https://gen.pollinations.ai/v1/chat/completions` dengan header `Authorization: Bearer ...` dan model ID katalog, sehingga administrator dapat memakai mode manual, mengisi URL tersebut, model yang tersedia, serta secret key Pollinations bila endpoint lama tidak lagi menerima permintaan. Dokumentasi resmi: https://gen.pollinations.ai/docs.
+Panel `/admin` juga menyediakan mode AI manual untuk endpoint OpenAI-compatible, nama model, dan API key milik pengguna. Key manual disimpan hanya di server. Endpoint utama Pollinations: `https://text.pollinations.ai/openai`, alias model `openai`. Pollinations juga telah menyediakan dokumentasi API generasi baru yang menggunakan autentikasi; bila endpoint legacy berubah, atur endpoint/model/key sesuai dokumentasi terbaru. Dokumentasi: https://gen.pollinations.ai/docs.
 
-Metadata Open Graph dan gambar preview `og-preview.png` disediakan agar tautan beranda menampilkan judul, deskripsi, dan gambar saat dibagikan ke aplikasi pesan yang mendukung link preview. URL gambar dibuat absolut berdasarkan domain publik yang terdeteksi atau `APP_PUBLIC_URL`/pengaturan URL publik. Menu Bot TT tersedia di `/bot`. Halaman ini memerlukan login administrator dan menyediakan kontrol ON/OFF bot, status bridge dan webhook, statistik, penyimpanan, AI fallback, serta log aktivitas terbaru. Saat bot OFF, webhook yang valid diakui oleh server tetapi pesan tidak diproses atau dibalas.
+## Koneksi Telegram dan WhatsApp
+
+**Telegram:** Buat token melalui akun resmi [@BotFather](https://t.me/BotFather), masukkan token ke `/admin` → Bot Telegram, periksa, lalu aktifkan. Konektor menggunakan Telegram Bot API long polling. Saat diaktifkan, webhook lama pada token yang sama dihapus agar `getUpdates` dapat digunakan. Pengguna perlu menekan Start pada chat bot. Grup tidak diproses. Jalankan satu instance aplikasi untuk token tersebut; dua poller akan saling memutus koneksi.
+
+**WhatsApp:** memakai Baileys 6.7.x dengan pairing code atau QR. Baileys adalah library komunitas dan bukan produk atau integrasi resmi WhatsApp. Tautkan hanya akun yang kamu miliki; akun dapat terkena pembatasan. Sesi disimpan di `APP_DATA_DIR/whatsapp-auth`. Jalankan satu instance aplikasi saat WhatsApp aktif. Pesan grup diabaikan; tes balasan dari nomor lain ke nomor yang tertaut.
+
+Ketika pertama kali mengaktifkan setiap platform, panel menampilkan lima peringatan. Admin harus menekan tombol **Paham** pada kelima peringatan sebelum tombol lanjut aktif. Persetujuan tidak menghilangkan risiko pembatasan akun, kebocoran data, atau gangguan penyedia.
+
+## Menu Info Admin dan preview link
+
+Ikon D kecil di kiri atas membuka panel Info Admin yang menampilkan owner, dua tautan proyek, tombol laporan bug lewat Gmail, dan TikTok DM. Metadata Open Graph/Twitter dan gambar `og-preview.png` 1200×630 disertakan untuk preview tautan beranda pada aplikasi yang mendukungnya.
+
+## Deploy ke Render
+
+Untuk menjalankan Node service, atur build command `npm install` dan start command `npm start`, lalu isi environment berikut: `APP_PUBLIC_URL` (domain HTTPS), `SESSION_SECRET` (acak dan panjang), `ADMIN_SETUP_TOKEN` (acak sekali pakai untuk membuat admin), `APP_DATA_DIR` (direktori data), serta `TIKTOK_BRIDGE_URL` yang dapat dijangkau bila TikTok dipakai. Telegram dan WhatsApp diatur melalui panel `/admin`; token tidak perlu dimasukkan ke GitHub.
+
+**Catatan Render Free:** layanan dapat sleep setelah tidak ada trafik masuk dan paket gratis tidak menyediakan persistent disk. Saat sleep, koneksi Telegram/WhatsApp dapat terputus. File konfigurasi lokal dan sesi WhatsApp dapat hilang saat service di-restart atau di-deploy ulang; jangan diasumsikan tersimpan permanen. Upload ke repository saja tidak membuat bot aktif 24 jam. Gunakan host yang selalu menyala dan storage persisten untuk bot yang harus berjalan terus. Lihat https://render.com/docs/free dan https://render.com/docs/disks.
 
 ## Data dan penyimpanan
 
 - Data admin, sesi tool, token konfigurasi, dan indeks file tersimpan pada volume Docker `dafzz-data`.
 - Sesi tool dan link file berlaku 24 jam.
-- File hasil disimpan sementara pada volume app. Tautan unduhan sulit ditebak, tidak memerlukan login, dan kedaluwarsa setelah 24 jam.
+- File hasil disimpan sementara pada volume app. Tautan unduhan sulit ditebak, tidak memerlukan login, dan kedaluwarsa setelah 24 jam. Token Telegram dan sesi WhatsApp disimpan di bawah APP_DATA_DIR; lindungi folder tersebut.
 - Pesan dan sesi TikTok disimpan oleh bridge pada volume `tiktok-data`. Retensi riwayat bridge mengikuti kebijakan upstream dan perlu dipantau.
 - Log aktivitas DAFZZ disimpan terbatas hingga 120 catatan terbaru dan tidak menyimpan isi DM atau secret.
 - Jangan menghapus volume Docker saat restart atau update. Buat backup privat terlebih dahulu.
@@ -169,11 +185,11 @@ Metadata Open Graph dan gambar preview `og-preview.png` disediakan agar tautan b
 
 Katalog berisi 401 entri dalam tujuh kategori: 300 tools lama tetap dipertahankan, sedangkan kategori ke-7 berisi Chat AI, 50 AI/Local Tools, dan 50 Bot Commands. Ini bukan berarti setiap fungsi identik dengan layanan desktop profesional. Website sumber sudah mencantumkan batasan untuk beberapa fitur: editor hapus objek/latar bersifat manual, annotasi bukan OCR, analisis dimensi foto bukan pengenalan wajah, beberapa layanan web memerlukan internet dan dapat terkena CORS, serta ekspor dokumen bisa berupa ekspor teks sederhana yang tidak mempertahankan seluruh tata letak. Beberapa library PDF/DOCX/XLSX dimuat dari CDN saat pertama digunakan.
 
-Laporan pemeriksaan teknis ada di `QA-REPORT.txt`. Pengujian integrasi langsung dengan akun TikTok belum dilakukan karena membutuhkan sesi akun milik pemiliknya.
+Laporan pemeriksaan teknis ada di `QA-REPORT.txt`. Pengujian integrasi langsung dengan akun TikTok, Telegram, dan WhatsApp belum dilakukan karena memerlukan token/sesi akun pemiliknya.
 
 
 ## STRUKTUR ARSIP
-ZIP memuat satu folder proyek utama. File-file aplikasi berada langsung di bawah folder tersebut; file baru `bot-commands.js` menampung seluruh 50 handler perintah bot.
+ZIP memuat satu folder proyek utama. File-file aplikasi berada langsung di bawah folder tersebut; file `bot-commands.js`, `connectors.js`, dan `admin-info.js` menampung mesin perintah bersama, konektor platform, dan panel info admin.
 
 ## STRUKTUR FILE DATAR
 Semua file bawaan ZIP diletakkan langsung di folder utama, tanpa subfolder `public`, `src`, `scripts`, `tests`, atau `vendor`. Nama file dibuat unik agar tidak ada yang tertimpa. Saat `setup.sh` dijalankan, folder `vendor/tiktok-dm-api` akan dibuat otomatis untuk source bridge eksternal yang dibutuhkan Docker.
